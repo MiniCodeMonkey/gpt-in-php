@@ -25,7 +25,7 @@ PHP ≥ 8.3 with OPcache (using 8.5.8 via Laravel Herd).
 - [x] Ch 1 — The map (Matrix::multiply + FLOP/s benchmark)
 - [x] Ch 2 — Tokenization (CharacterTokenizer + BytePairEncoder)
 - [x] Ch 3 — Bigram model (BigramModel + RandomNumberGenerator, loss 2.4546)
-- [ ] Ch 4 — Autograd
+- [x] Ch 4 — Autograd (Value engine + TinyNeuralNetwork learns XOR)
 - [ ] Ch 5 — Tensors
 - [ ] Ch 6 — MLP language model
 - [ ] Ch 7 — Self-attention

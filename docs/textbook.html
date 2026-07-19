@@ -176,6 +176,18 @@
   .hm-cell { aspect-ratio: 1; border-radius: 1px; background: var(--accent-soft); cursor: crosshair; }
   .hm-cell:hover { outline: 1px solid var(--ink); }
 
+  /* ---- ch4: computation graph + gradient descent ---- */
+  .vg-cols { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .vg-col { display: flex; flex-direction: column; gap: 10px; }
+  .vnode { border: 1px solid var(--line); background: var(--paper); border-radius: 8px; padding: 8px 12px; min-width: 118px; }
+  .vnode .vn { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+  .vnode .vd { font-family: var(--mono); font-size: 13.5px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .vnode .vg { font-family: var(--mono); font-size: 13.5px; color: var(--amber); font-variant-numeric: tabular-nums; }
+  .vnode input[type="range"] { width: 100%; margin-top: 6px; }
+  .vnode.lit { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
+  .varrow { font-family: var(--mono); color: var(--muted); }
+  @media (prefers-reduced-motion: no-preference) { .vnode { transition: box-shadow .3s, border-color .3s; } }
+
   .next { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 18px 20px; margin-top: 48px; }
   .next .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
   hr { border: none; border-top: 1px solid var(--line); margin: 48px 0; }
@@ -192,8 +204,8 @@
   <ol>
     <li><a href="#ch1"><span class="num">01</span>The map ✓</a></li>
     <li><a href="#ch2"><span class="num">02</span>Tokenization ✓</a></li>
-    <li><a class="here" href="#ch3" aria-current="page"><span class="num">03</span>The bigram model</a></li>
-    <li><span class="locked"><span class="num">04</span>Autograd</span></li>
+    <li><a href="#ch3"><span class="num">03</span>The bigram model ✓</a></li>
+    <li><a class="here" href="#ch4" aria-current="page"><span class="num">04</span>Autograd</a></li>
     <li><span class="locked"><span class="num">05</span>Tensors</span></li>
     <li><span class="locked"><span class="num">06</span>MLP language model</span></li>
     <li><span class="locked"><span class="num">07</span>Self-attention</span></li>
@@ -247,8 +259,8 @@
   <div class="map">
     <div class="mcard"><div class="mnum">CH 01 — DONE ✓</div><div class="mtitle">The map</div><div class="mwhat">The big idea, the pipeline, and a benchmark: this Mac's PHP FLOP/s.</div></div>
     <div class="mcard"><div class="mnum">CH 02 — DONE ✓</div><div class="mtitle">Tokenization</div><div class="mwhat">Text → numbers. A character tokenizer, then mini-BPE like the real ones.</div></div>
-    <div class="mcard here"><div class="mnum">CH 03 — YOU ARE HERE</div><div class="mtitle">The bigram model</div><div class="mwhat">A counting-based name generator. Your first generative model — no neural net.</div></div>
-    <div class="mcard dim"><div class="mnum">CH 04</div><div class="mtitle">Autograd</div><div class="mwhat">Backpropagation from scratch: a Value class that computes its own gradients.</div></div>
+    <div class="mcard"><div class="mnum">CH 03 — DONE ✓</div><div class="mtitle">The bigram model</div><div class="mwhat">A counting-based name generator. Your first generative model — no neural net.</div></div>
+    <div class="mcard here"><div class="mnum">CH 04 — YOU ARE HERE</div><div class="mtitle">Autograd</div><div class="mwhat">Backpropagation from scratch: a Value class that computes its own gradients.</div></div>
     <div class="mcard dim"><div class="mnum">CH 05</div><div class="mtitle">Tensors</div><div class="mwhat">Matrix ops, softmax, cross-entropy. The bigram reborn as a trained network.</div></div>
     <div class="mcard dim"><div class="mnum">CH 06</div><div class="mtitle">MLP language model</div><div class="mwhat">Context windows, hidden layers, the training loop, overfitting.</div></div>
     <div class="mcard dim"><div class="mnum">CH 07</div><div class="mtitle">Self-attention</div><div class="mwhat">The heart of the transformer, with heatmaps rendered from your own model.</div></div>
@@ -524,8 +536,111 @@ php bin/train-bigram.php</code></pre>
     <div class="qwhy"></div>
   </div>
 
+  <div class="next"><span class="tag">Chapter 3 complete ✓</span>
+  <p style="margin:8px 0 0">Counting hit its ceiling at loss 2.4546. <a href="#ch4">Continue to Chapter 4: Autograd →</a></p></div>
+</section>
+
+<section id="ch4">
+  <hr>
+  <p class="eyebrow">Chapter 04 · Autograd</p>
+  <h1>The engine that lets machines learn.</h1>
+  <p class="lede">The bigram counted. Everything from here on <em>learns</em> — and learning runs on one idea: for every knob in the model, compute which way to turn it. This chapter builds that engine in ~200 lines of PHP. It is the same idea inside PyTorch, and inside whatever trained Claude.</p>
+
+  <h2 id="knobs"><span class="sec">§4.1</span> The knob problem</h2>
+  <p>A neural network is a function with two kinds of inputs: the data (fixed, given) and the <strong>parameters</strong> — thousands to trillions of plain numbers, the "knobs". Feed data through, compare the output to what you wanted, and the loss comes out. So the loss is really a function <em>of the knobs</em>.</p>
+  <p>Training means: adjust the knobs to make the loss smaller. The brute-force way is to nudge one knob a tiny bit, rerun the whole model, and see if the loss dropped — but with a million knobs that's a million full runs <em>per adjustment step</em>. Useless.</p>
+  <p>The escape is <strong>backpropagation</strong>: if you remember how every intermediate number was computed — the full family tree of the calculation — you can start at the loss and walk that tree <em>backwards</em>, computing every knob's influence in a single reverse pass that costs about as much as one forward run. A million answers for the price of two. This is the algorithm that makes deep learning economically possible, and it's what <code>Value::backward()</code> does.</p>
+
+  <div class="demo">
+    <div class="demo-label">A live computation graph — L = tanh(a·b + c). Drag the knobs.</div>
+    <div class="vg-cols" id="vg"></div>
+    <div class="demo-foot">
+      <button class="btn" id="vg-play" type="button">▶ Replay the backward pass</button>
+      <span class="demo-note" id="vg-note">Blue = the value flowing forward. Amber = the gradient flowing backward: "if this number rose by a tiny ε, L would change by gradient × ε."</span>
+    </div>
+  </div>
+
+  <h2 id="chain"><span class="sec">§4.2</span> The chain rule, minus the fear</h2>
+  <p>How can one backward pass know every knob's influence? Because <strong>each operation only needs to know its own local rule</strong>, and the rules compose. Watch the demo above: every node's gradient is its <em>local derivative</em> times the gradient of the node it feeds into — influence flowing downstream:</p>
+  <p><strong>add</strong> passes gradient through untouched (nudge either side of a sum by ε, the sum moves by ε). <strong>multiply</strong> swaps in the other factor (nudge one factor by ε, the product moves by <em>other</em>·ε). <strong>tanh</strong> scales by 1−tanh², which is why its curve flattens learning at the extremes. That's the entire chain rule — "my effect on L = my effect on my child × my child's effect on L" — and <code>src/Value.php</code> is just these local rules plus bookkeeping.</p>
+  <div class="aside"><span class="tag">The classic bug</span>
+  Every rule uses <code>+=</code>, never <code>=</code>: a value used in two places receives influence from both. And that's why training loops must call <code>zeroGradients()</code> before each backward pass — forget it, and stale gradients from the last step pile onto the new ones. Every ML practitioner has been bitten; ours is <code>TinyNeuralNetwork::zeroGradients()</code>.</div>
+
+  <h2 id="descent"><span class="sec">§4.3</span> Gradient descent: rolling downhill</h2>
+  <p>Gradients in hand, learning is almost embarrassingly simple: nudge every knob a small step <em>against</em> its gradient — downhill on the loss surface — and repeat. The step size is the <strong>learning rate</strong>, and it is the most temperamental number in machine learning. Feel it:</p>
+
+  <div class="demo">
+    <div class="demo-label">Gradient descent on a loss curve — one knob, so the surface is a line you can see</div>
+    <canvas id="gd-canvas" width="1240" height="440" style="width:100%; height:auto; border-radius:6px"></canvas>
+    <div class="demo-foot">
+      <button class="btn" id="gd-step" type="button">Step</button>
+      <button class="btn ghost" id="gd-run" type="button">Run 25 steps</button>
+      <button class="btn ghost" id="gd-reset" type="button">↺ New start</button>
+      <label class="demo-note" for="gd-lr" style="display:flex;align-items:center;gap:8px">learning rate
+        <input type="range" id="gd-lr" min="-2" max="0.20" step="0.01" value="-1.1" style="width:130px">
+        <span id="gd-lr-val" style="font-variant-numeric:tabular-nums"></span></label>
+    </div>
+    <p class="demo-note" id="gd-note" style="margin:8px 0 0">Each step moves x by −(learning rate × slope). Try ~0.02 (crawls), ~0.6 (bounces), ~1.4 (explodes). Also try starts on the left hill — you'll meet a <em>local</em> minimum.</p>
+  </div>
+  <p style="margin-top:16px">With a million knobs nothing changes conceptually — the ball rolls on a million-dimensional surface. Real training (and chapter 6) adds refinements — step-size schedules, momentum-style optimizers like Adam — but they are all garnish on <code>data -= learningRate × gradient</code>.</p>
+
+  <h2 id="proof"><span class="sec">§4.4</span> Trust, but verify — then a small piece of history</h2>
+  <p>How do we know our calculus is right? We check it against physics: <code>tests/check-ch4.php</code> takes an intentionally ugly function, computes gradients with <code>backward()</code>, then <em>actually nudges</em> each input by 0.000001 and measures how the output moves. The two answers agree to seven decimal places. This "numerical gradient check" is how real ML engineers debug hand-written layers — slow but unarguable.</p>
+  <p>Then the payoff run, <code>bin/train-tiny-network.php</code>: a 17-parameter network learns <strong>XOR</strong> — "exactly one of the two inputs is true". XOR is historically loaded: in 1969 Minsky &amp; Papert proved single-layer networks can't represent it, an argument that helped freeze neural-network research for a decade. A hidden layer plus tanh dissolves the objection, and gradient descent finds the solution in half a second of PHP:</p>
+  <pre><code>step   1   loss 3.7515
+step 100   loss 0.0425
+step 500   loss 0.0048
+
+XOR(0, 0) = -0.979   XOR(0, 1) = +0.965
+XOR(1, 0) = +0.963   XOR(1, 1) = -0.959</code></pre>
+  <p>Nothing was programmed. Seventeen numbers were nudged five hundred times, each time in the direction <code>backward()</code> said would reduce the loss. <strong>That is all "learning" is</strong> — at every scale, including the frontier.</p>
+
+  <h2 id="ch4-build"><span class="sec">§4.5</span> The build</h2>
+  <div class="files">
+llm/<br>
+├── src/Value.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="you">← the autograd engine — the chapter's soul</span><br>
+├── src/TinyNeuralNetwork.php&nbsp;&nbsp;&nbsp;<span class="you">← Neuron / Layer / network, built on Value</span><br>
+├── bin/train-tiny-network.php&nbsp;&nbsp;<span class="dim">watch XOR being learned</span><br>
+└── tests/check-ch4.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">9 checks incl. the numerical gradient check</span>
+  </div>
+  <pre><code>php tests/check-ch4.php
+php bin/train-tiny-network.php</code></pre>
+  <p>Reading order in <code>Value.php</code>: the class comment, then <code>multiply()</code> (one local rule in full), then <code>backward()</code>. In <code>TinyNeuralNetwork.php</code>, notice a Neuron is five lines of math: weights times inputs, plus bias, through tanh.</p>
+
+  <h2 id="ch4-quiz"><span class="sec">§4.6</span> Checkpoint quiz</h2>
+
+  <div class="quiz" data-why="Right — a gradient is a local sensitivity reading: 'if this knob rose by a tiny ε, the loss would change by gradient × ε.' Negative gradient? Turning the knob up helps. The update rule data -= learningRate × gradient follows directly.">
+    <div class="q">1. A weight has gradient −2.5. What does that literally mean?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">The weight is 2.5 units too small</button>
+      <button class="qopt" type="button" data-right>Nudging the weight up by a tiny ε would move the loss by −2.5ε — so increasing it helps</button>
+      <button class="qopt" type="button">The weight will be set to −2.5 next step</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Exactly — nudge-and-rerun costs one full forward pass per parameter (a million runs per step). Backprop reuses the remembered computation graph to get every gradient in one reverse sweep costing about one forward pass. Same answers, a million times cheaper.">
+    <div class="q">2. Why is backpropagation such a big deal versus just nudging each knob and rerunning?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">Nudging gives wrong answers; backprop gives right ones</button>
+      <button class="qopt" type="button" data-right>Same answers — but backprop computes all million gradients in one reverse pass instead of a million reruns</button>
+      <button class="qopt" type="button">Backprop avoids floating-point rounding errors</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Yes — the step is −(learning rate × slope), so a big learning rate on a steep slope overshoots the valley and can land somewhere steeper, bouncing further out each time until the loss explodes. You saw it happen on the canvas. Too small merely crawls; too big detonates.">
+    <div class="q">3. What goes wrong with a learning rate that's too large?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">Training is slower but otherwise fine</button>
+      <button class="qopt" type="button">The model memorizes the data instead of learning</button>
+      <button class="qopt" type="button" data-right>Steps overshoot the valley and can bounce outward until the loss blows up</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
   <div class="next"><span class="tag">When you're ready</span>
-  <p style="margin:8px 0 0">Generate some names, hover the heatmap, read <code>BigramModel.php</code>, then say <strong>"chapter 3 done"</strong>. Next: <em>Autograd</em> — the single most important chapter of the course, where we build the engine that lets models learn.</p></div>
+  <p style="margin:8px 0 0">Drag the knobs, break the learning rate, read <code>Value.php</code>, then say <strong>"chapter 4 done"</strong>. Next: <em>Tensors</em> — the same math in matrix form (fast enough for 32,033 names), plus embeddings and softmax: the last ingredients before real language models.</p></div>
 </section>
 </main>
 </div>
@@ -848,6 +963,139 @@ php bin/train-bigram.php</code></pre>
       (p * 100).toFixed(2) + '%</strong>' + (from === '·' ? ' — chance a name <em>starts</em> with ' + to
       : to === '·' ? ' — chance a name <em>ends</em> after ' + from : '');
   });
+
+  // ---------- ch4: live computation graph ----------
+  var vgState = { a: 1.2, b: -0.8, c: 0.6 };
+  var vgEl = document.getElementById('vg'), vgNote = document.getElementById('vg-note');
+  var vgDefs = [
+    { key: 'a', name: 'a  (knob)', col: 0, slider: true },
+    { key: 'b', name: 'b  (knob)', col: 0, slider: true },
+    { key: 'c', name: 'c  (knob)', col: 0, slider: true },
+    { key: 'e', name: 'e = a × b', col: 1 },
+    { key: 'd', name: 'd = e + c', col: 2 },
+    { key: 'L', name: 'L = tanh(d)', col: 3 }
+  ];
+  var vgNodes = {};
+  (function buildGraph() {
+    var cols = [];
+    for (var i = 0; i < 4; i++) {
+      var col = document.createElement('div'); col.className = 'vg-col'; cols.push(col);
+    }
+    vgDefs.forEach(function (def) {
+      var node = document.createElement('div'); node.className = 'vnode'; node.id = 'vn-' + def.key;
+      node.innerHTML = '<div class="vn">' + def.name + '</div><div class="vd"></div><div class="vg"></div>' +
+        (def.slider ? '<input type="range" min="-2" max="2" step="0.1" value="' + vgState[def.key] + '" data-key="' + def.key + '" aria-label="' + def.key + '">' : '');
+      cols[def.col].appendChild(node);
+      vgNodes[def.key] = node;
+    });
+    cols.forEach(function (col, i) {
+      vgEl.appendChild(col);
+      if (i < 3) { var a = document.createElement('span'); a.className = 'varrow'; a.textContent = '→'; vgEl.appendChild(a); }
+    });
+  })();
+  function vgCompute() {
+    var a = vgState.a, b = vgState.b, c = vgState.c;
+    var e = a * b, d = e + c, L = Math.tanh(d);
+    var gL = 1, gd = (1 - L * L) * gL, ge = gd, gc = gd, ga = b * ge, gb = a * ge;
+    return { data: { a: a, b: b, c: c, e: e, d: d, L: L }, grad: { a: ga, b: gb, c: gc, e: ge, d: gd, L: gL } };
+  }
+  function vgRender() {
+    var r = vgCompute();
+    Object.keys(vgNodes).forEach(function (key) {
+      vgNodes[key].querySelector('.vd').textContent = 'value ' + r.data[key].toFixed(3);
+      vgNodes[key].querySelector('.vg').textContent = 'grad  ' + r.grad[key].toFixed(3);
+    });
+  }
+  vgEl.addEventListener('input', function (event) {
+    var key = event.target.dataset.key;
+    if (!key) return;
+    vgState[key] = parseFloat(event.target.value);
+    vgRender();
+  });
+  vgRender();
+  document.getElementById('vg-play').addEventListener('click', function () {
+    var steps = [
+      { keys: ['L'], text: 'Start at the output: L moves 1-for-1 with itself, so its gradient is 1.' },
+      { keys: ['d'], text: 'tanh rule: d.grad = (1 − tanh²) × L.grad — the squash flattens influence at the extremes.' },
+      { keys: ['e', 'c'], text: 'add rule: gradient passes through untouched — e and c both inherit d.grad.' },
+      { keys: ['a', 'b'], text: 'multiply rule: each factor gets THE OTHER factor × e.grad. Done — every knob knows its influence.' }
+    ];
+    Object.keys(vgNodes).forEach(function (k) { vgNodes[k].classList.remove('lit'); });
+    var i = 0;
+    (function next() {
+      if (i >= steps.length) return;
+      steps[i].keys.forEach(function (k) { vgNodes[k].classList.add('lit'); });
+      vgNote.textContent = steps[i].text;
+      i++;
+      setTimeout(next, instantMotion ? 0 : 1000);
+    })();
+  });
+
+  // ---------- ch4: gradient descent playground ----------
+  var gdCanvas = document.getElementById('gd-canvas'), gdCtx = gdCanvas.getContext('2d');
+  var gdNote = document.getElementById('gd-note'), gdLr = document.getElementById('gd-lr'),
+      gdLrVal = document.getElementById('gd-lr-val');
+  var gdX = 2.9, gdTrail = [], gdTimer = null;
+  var XMIN = -3.4, XMAX = 3.4, YMIN = -0.4, YMAX = 7.2;
+  function fLoss(x) { return 0.1 * x * x * x * x - 0.8 * x * x + 0.15 * x + 2; }
+  function fSlope(x) { return 0.4 * x * x * x - 1.6 * x + 0.15; }
+  function toPx(x, y) {
+    return [(x - XMIN) / (XMAX - XMIN) * gdCanvas.width, gdCanvas.height - (y - YMIN) / (YMAX - YMIN) * gdCanvas.height];
+  }
+  function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function gdDraw() {
+    var w = gdCanvas.width, h = gdCanvas.height;
+    gdCtx.clearRect(0, 0, w, h);
+    gdCtx.fillStyle = cssVar('--card'); gdCtx.fillRect(0, 0, w, h);
+    gdCtx.strokeStyle = cssVar('--accent'); gdCtx.lineWidth = 3; gdCtx.beginPath();
+    for (var px = 0; px <= w; px += 4) {
+      var x = XMIN + px / w * (XMAX - XMIN), p = toPx(x, fLoss(x));
+      px === 0 ? gdCtx.moveTo(p[0], p[1]) : gdCtx.lineTo(p[0], p[1]);
+    }
+    gdCtx.stroke();
+    gdTrail.forEach(function (tx, i) {
+      var p = toPx(tx, fLoss(tx));
+      gdCtx.globalAlpha = 0.15 + 0.5 * (i / Math.max(1, gdTrail.length - 1));
+      gdCtx.fillStyle = cssVar('--amber');
+      gdCtx.beginPath(); gdCtx.arc(p[0], p[1], 7, 0, 7); gdCtx.fill();
+    });
+    gdCtx.globalAlpha = 1;
+    if (Math.abs(gdX) <= XMAX) {
+      var ball = toPx(gdX, fLoss(gdX));
+      gdCtx.fillStyle = cssVar('--amber');
+      gdCtx.beginPath(); gdCtx.arc(ball[0], ball[1], 12, 0, 7); gdCtx.fill();
+      var slope = fSlope(gdX); // short tangent line through the ball
+      gdCtx.strokeStyle = cssVar('--muted'); gdCtx.lineWidth = 2; gdCtx.beginPath();
+      var span = 0.55, p1 = toPx(gdX - span, fLoss(gdX) - slope * span), p2 = toPx(gdX + span, fLoss(gdX) + slope * span);
+      gdCtx.moveTo(p1[0], p1[1]); gdCtx.lineTo(p2[0], p2[1]); gdCtx.stroke();
+    }
+    gdCtx.font = '22px ui-monospace, monospace'; gdCtx.fillStyle = cssVar('--muted');
+    gdCtx.fillText('x = ' + gdX.toFixed(3) + '   loss = ' + fLoss(gdX).toFixed(3) + '   slope = ' + fSlope(gdX).toFixed(3), 18, 32);
+  }
+  function gdLearningRate() { return Math.pow(10, parseFloat(gdLr.value)); }
+  function gdRefreshLr() { gdLrVal.textContent = gdLearningRate().toFixed(2); }
+  function gdDoStep() {
+    if (Math.abs(gdX) > XMAX) return;
+    gdTrail.push(gdX); if (gdTrail.length > 40) gdTrail.shift();
+    gdX = gdX - gdLearningRate() * fSlope(gdX);
+    if (Math.abs(gdX) > XMAX) gdNote.textContent = '💥 Diverged — the step overshot so far it left the chart. That is a too-large learning rate. Reset and try smaller.';
+    gdDraw();
+  }
+  gdLr.addEventListener('input', function () { gdRefreshLr(); });
+  document.getElementById('gd-step').addEventListener('click', gdDoStep);
+  document.getElementById('gd-run').addEventListener('click', function () {
+    if (gdTimer) clearInterval(gdTimer);
+    if (instantMotion) { for (var i = 0; i < 25; i++) gdDoStep(); return; }
+    var n = 0;
+    gdTimer = setInterval(function () { gdDoStep(); if (++n >= 25 || Math.abs(gdX) > XMAX) clearInterval(gdTimer); }, 110);
+  });
+  document.getElementById('gd-reset').addEventListener('click', function () {
+    if (gdTimer) clearInterval(gdTimer);
+    gdX = (Math.random() * 6 - 3); gdTrail = [];
+    gdNote.textContent = 'New start at x = ' + gdX.toFixed(2) + '. Step downhill.';
+    gdDraw();
+  });
+  gdRefreshLr(); gdDraw();
 
   // ---------- quiz ----------
   document.querySelectorAll('.quiz').forEach(function (q) {
