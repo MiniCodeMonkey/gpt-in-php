@@ -8,8 +8,10 @@ gradient verified against numerical differentiation.
 
 Built as an interactive learning course — the code was written chapter by chapter
 with [Claude Code](https://claude.com/claude-code), paired with an interactive
-textbook ([`docs/textbook.html`](docs/textbook.html); open it in a browser — its
-final demo runs the trained chatbot's full transformer forward pass in the page).
+textbook with 15 live demos built from the real training runs.
+
+**📖 Read the textbook: https://minicodemonkey.github.io/gpt-in-php/** — its final
+demo runs the trained chatbot's full transformer forward pass right in the page.
 
 ## The results
 
