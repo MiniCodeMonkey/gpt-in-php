@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/../src/Mat.php';
+require __DIR__ . '/../src/Matrix.php';
 
-use Llm\Mat;
+use Llm\Matrix;
 
 // Chapter 1 benchmark: how many floating-point multiply-adds per second
-// can this machine do through Mat::matmul?
+// can this machine do through Matrix::multiply?
 //
 // One n×n·n×n matmul costs 2·n³ floating-point operations (a multiply and
 // an add per inner step). We time repeated 128×128 multiplies and report MFLOP/s.
@@ -31,13 +31,13 @@ $a = $mk();
 $b = $mk();
 
 for ($w = 0; $w < 3; $w++) {
-    Mat::matmul($a, $b); // warm-up (lets the JIT trace and compile the hot loop before we time it)
+    Matrix::multiply($a, $b); // warm-up (lets the JIT trace and compile the hot loop before we time it)
 }
 
 $reps = 20;
 $t0 = hrtime(true);
 for ($i = 0; $i < $reps; $i++) {
-    $c = Mat::matmul($a, $b);
+    $c = Matrix::multiply($a, $b);
 }
 $seconds = (hrtime(true) - $t0) / 1e9;
 

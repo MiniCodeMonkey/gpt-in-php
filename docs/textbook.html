@@ -155,6 +155,21 @@
   .qwhy { font-size: 14.5px; color: var(--muted); margin-top: 10px; display: none; }
   .qwhy.show { display: block; }
 
+  /* ---- ch2: tokenizer + BPE demos ---- */
+  .tk-input { width: 100%; font-family: var(--mono); font-size: 15px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+  .tk-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .tok small { display: block; font-size: 9.5px; color: var(--muted); text-align: center; line-height: 1.2; }
+  .tok.bad { border-color: #C24141; border-style: dashed; color: #C24141; background: transparent; }
+  .bpe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 640px) { .bpe-grid { grid-template-columns: 1fr; } }
+  .bpe-h { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .prow { display: grid; grid-template-columns: 64px 1fr 44px; gap: 10px; align-items: center; font-family: var(--mono); font-size: 13px; padding: 3px 0; }
+  .prow .bar { height: 8px; border-radius: 4px; background: var(--accent-soft); position: relative; }
+  .prow .bar i { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 4px; }
+  .prow .cnt { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .bpe-merges { font-size: 13px; line-height: 2; }
+  .mg { display: inline-block; font-family: var(--mono); background: var(--accent-soft); border-radius: 4px; padding: 1px 7px; margin: 0 4px 4px 0; }
+
   .next { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 18px 20px; margin-top: 48px; }
   .next .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
   hr { border: none; border-top: 1px solid var(--line); margin: 48px 0; }
@@ -169,8 +184,8 @@
   <div class="brand">GPT, in <span class="php">PHP</span></div>
   <div class="brand-sub">The Textbook</div>
   <ol>
-    <li><a class="here" href="#ch1" aria-current="page"><span class="num">01</span>The map</a></li>
-    <li><span class="locked"><span class="num">02</span>Tokenization</span></li>
+    <li><a href="#ch1"><span class="num">01</span>The map ✓</a></li>
+    <li><a class="here" href="#ch2" aria-current="page"><span class="num">02</span>Tokenization</a></li>
     <li><span class="locked"><span class="num">03</span>The bigram model</span></li>
     <li><span class="locked"><span class="num">04</span>Autograd</span></li>
     <li><span class="locked"><span class="num">05</span>Tensors</span></li>
@@ -183,7 +198,7 @@
   </ol>
 </nav>
 
-<main id="ch1">
+<main><section id="ch1">
   <p class="eyebrow">Chapter 01 · The map</p>
   <h1>A language model is a next-word guessing machine.</h1>
   <p class="lede">That's the whole secret. Everything else — Claude, ChatGPT, the model you're about to build in PHP — is engineering to make that one guess very, very good.</p>
@@ -224,8 +239,8 @@
 
   <h2 id="map"><span class="sec">§1.4</span> The course</h2>
   <div class="map">
-    <div class="mcard here"><div class="mnum">CH 01 — YOU ARE HERE</div><div class="mtitle">The map</div><div class="mwhat">The big idea, the pipeline, and a matmul benchmark: your Mac's PHP FLOP/s.</div></div>
-    <div class="mcard dim"><div class="mnum">CH 02</div><div class="mtitle">Tokenization</div><div class="mwhat">Text → numbers. A character tokenizer, then mini-BPE like the real ones.</div></div>
+    <div class="mcard"><div class="mnum">CH 01 — DONE ✓</div><div class="mtitle">The map</div><div class="mwhat">The big idea, the pipeline, and a benchmark: this Mac's PHP FLOP/s.</div></div>
+    <div class="mcard here"><div class="mnum">CH 02 — YOU ARE HERE</div><div class="mtitle">Tokenization</div><div class="mwhat">Text → numbers. A character tokenizer, then mini-BPE like the real ones.</div></div>
     <div class="mcard dim"><div class="mnum">CH 03</div><div class="mtitle">The bigram model</div><div class="mwhat">A counting-based name generator. Your first generative model — no neural net.</div></div>
     <div class="mcard dim"><div class="mnum">CH 04</div><div class="mtitle">Autograd</div><div class="mwhat">Backpropagation from scratch: a Value class that computes its own gradients.</div></div>
     <div class="mcard dim"><div class="mnum">CH 05</div><div class="mtitle">Tensors</div><div class="mwhat">Matrix ops, softmax, cross-entropy. The bigram reborn as a trained network.</div></div>
@@ -237,16 +252,16 @@
     <div class="mcard dim"><div class="mnum">CH 11</div><div class="mtitle">To the frontier</div><div class="mwhat">Scaling laws, RLHF, and what separates your GPT from Claude.</div></div>
   </div>
 
-  <h2 id="mission"><span class="sec">§1.5</span> Your mission</h2>
-  <p>One task, two payoffs: write your first tensor operation, and measure your machine. <strong>Matrix multiplication</strong> is the workhorse of deep learning — by chapter 8, ~95% of your model's runtime will be spent inside the function you write today.</p>
+  <h2 id="mission"><span class="sec">§1.5</span> The build</h2>
+  <p>Chapter 1's code is <strong>matrix multiplication</strong> — the workhorse of deep learning. By chapter 8, ~95% of the model's runtime will be spent inside this one function. (The ML world calls it <em>matmul</em>; in our codebase it's spelled out as <code>Matrix::multiply()</code>.)</p>
 
   <h3>The files</h3>
   <div class="files">
 llm/<br>
-├── src/Mat.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="you">← you write matmul() here</span><br>
-├── bin/bench.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">benchmark harness (provided)</span><br>
-├── bin/phpj&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">runs php with the JIT compiler on (provided)</span><br>
-└── tests/check-ch1.php&nbsp;<span class="dim">verifies your matmul is correct (provided)</span>
+├── src/Matrix.php&nbsp;&nbsp;&nbsp;&nbsp;<span class="you">← Matrix::multiply() — read this one</span><br>
+├── bin/bench.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">benchmark: measures your Mac's MFLOP/s</span><br>
+├── bin/phpj&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">runs php with the JIT compiler on</span><br>
+└── tests/check-ch1.php&nbsp;<span class="dim">verifies multiply() is correct</span>
   </div>
 
   <h3>The math (all of it)</h3>
@@ -254,15 +269,10 @@ llm/<br>
   <pre><code>C[i][j] = A[i][0]·B[0][j] + A[i][1]·B[1][j] + … + A[i][k-1]·B[k-1][j]</code></pre>
   <p>Concretely: <code>[[1,2],[3,4]] · [[5,6],[7,8]]</code> → cell (0,0) is <code>1·5 + 2·7 = 19</code>. Matrices in our project are plain PHP arrays of rows: <code>[[1.0, 2.0], [3.0, 4.0]]</code>.</p>
 
-  <details class="hint"><summary>Hint 1 — loop structure</summary><div>Three nested loops: over rows <code>i</code> of A, over columns <code>j</code> of B, and inside, over <code>k</code> accumulating the dot product into a sum before assigning <code>$c[$i][$j]</code>.</div></details>
-  <details class="hint"><summary>Hint 2 — near-pseudocode (last resort)</summary><div><pre><code>for i in 0..n-1:
-  for j in 0..m-1:
-    sum = 0.0
-    for k in 0..K-1: sum += a[i][k] * b[k][j]
-    c[i][j] = sum</code></pre></div></details>
+  <p>The implementation is three nested loops — over rows of the left matrix, over columns of the right, and an inner loop accumulating the dot product. That's the entire function. One detail worth noticing in <code>src/Matrix.php</code>: the current row of the left matrix is copied to a local variable before the inner loops (<code>$leftRow</code>), saving one array lookup per innermost step — in the hottest loop of the whole project, that alone was worth ~25% speed.</p>
 
   <h3>Run it</h3>
-  <pre><code><span class="c"># 1. correctness — must print all ✓ before benchmarking</span>
+  <pre><code><span class="c"># 1. correctness — four ✓ checks</span>
 php tests/check-ch1.php
 
 <span class="c"># 2. benchmark, plain PHP interpreter</span>
@@ -271,8 +281,8 @@ php bin/bench.php
 <span class="c"># 3. benchmark again with the JIT compiler</span>
 ./bin/phpj bin/bench.php</code></pre>
 
-  <div class="check"><span class="tag">Done when</span><br>
-  The check script passes, and you can report both MFLOP/s numbers back to Claude. Expect very roughly tens of MFLOP/s plain and a healthy multiple of that with JIT — we'll interpret the numbers together.</div>
+  <div class="check"><span class="tag">Result — measured on this Mac</span><br>
+  All checks pass. Plain PHP: <strong>184 MFLOP/s</strong>. With JIT: <strong>1,217 MFLOP/s</strong> — a 6.6× speedup for two command-line flags. For perspective, one H100 GPU does ~10¹⁵ FLOP/s: about a <em>million times</em> more. That ratio is the entire story of why our models stay tiny, and we'll come back to it in chapter 11.</div>
 
   <div class="aside"><span class="tag">Why JIT matters here</span>
   Plain PHP re-interprets every <code>+=</code> and array access, billions of times. The JIT compiles your hot loops to native machine code. It's the difference between a model that trains over lunch and one that trains overnight — for free.</div>
@@ -309,8 +319,111 @@ php bin/bench.php
     <div class="qwhy"></div>
   </div>
 
-  <div class="next"><span class="tag">When you're done</span>
-  <p style="margin:8px 0 0">Implement <code>matmul()</code>, get the checks green, run both benchmarks, then tell Claude: <strong>"chapter 1 done — here are my numbers."</strong> Next up: <em>Tokenization</em>, where text becomes numbers.</p></div>
+  <div class="next"><span class="tag">Chapter 1 complete ✓</span>
+  <p style="margin:8px 0 0">Matrix multiplication works, the machine is measured, and the JIT is our friend. <a href="#ch2">Continue to Chapter 2: Tokenization →</a></p></div>
+</section>
+
+<section id="ch2">
+  <hr>
+  <p class="eyebrow">Chapter 02 · Tokenization</p>
+  <h1>Before it can read, text must become numbers.</h1>
+  <p class="lede">A neural network is a pile of arithmetic. It cannot see letters — only numbers. The tokenizer is the bridge, and it shapes everything the model can and cannot do.</p>
+
+  <div class="demo">
+    <div class="demo-label">Live tokenizer — type anything (vocabulary: a–z + newline, learned from 32,033 names)</div>
+    <input id="tk-input" class="tk-input" type="text" value="mathias" maxlength="40" aria-label="Text to tokenize" spellcheck="false" autocomplete="off">
+    <div class="ctx" id="tk-tokens" style="margin-top:14px"></div>
+    <p class="demo-note" id="tk-note" style="margin:6px 0 0"></p>
+  </div>
+
+  <h2 id="bridge"><span class="sec">§2.1</span> A reversible bridge</h2>
+  <p>A tokenizer is two functions that must be perfect inverses: <code>encode()</code> maps text to a list of integer <strong>token IDs</strong>, and <code>decode()</code> maps IDs back to the exact original text. The set of pieces it knows is the <strong>vocabulary</strong>, and each piece's position in that list <em>is</em> its ID. That's all a tokenizer is.</p>
+  <p>Ours is character-level: scanning the names corpus finds 27 distinct characters (a–z plus the newline between names), sorted so IDs are stable: <code>\n</code>=0, <code>a</code>=1 … <code>z</code>=26. So <code>encode("mathias")</code> → <code>[13, 1, 20, 8, 9, 1, 19]</code> — and from here on, the model will never see anything else.</p>
+  <div class="aside"><span class="tag">Token 0 is special</span>
+  The newline separating names becomes an ordinary token — and that quietly gives the model a way to say <em>"this name is finished."</em> In chapter 10 the same trick, with tokens like <code>&lt;|user|&gt;</code> and <code>&lt;|assistant|&gt;</code>, is what turns a text-completer into a chatbot. Special tokens are just tokens.</div>
+
+  <h2 id="bpe"><span class="sec">§2.2</span> Growing a vocabulary: byte-pair encoding</h2>
+  <p>Characters are a tiny vocabulary (27) but long sequences — and compute scales with sequence length. Real tokenizers spend a bigger vocabulary to buy shorter sequences, and they choose the vocabulary <em>from the data itself</em> with an algorithm from 1994: <strong>byte-pair encoding</strong> (BPE). One rule, repeated: <em>find the most frequent adjacent pair of tokens, glue it into a new token.</em> Watch it run on real names:</p>
+
+  <div class="demo">
+    <div class="demo-label">BPE, one merge at a time — corpus: 40 popular names</div>
+    <div class="bpe-grid">
+      <div>
+        <div class="bpe-h">Most frequent pairs right now</div>
+        <div id="bpe-pairs"></div>
+      </div>
+      <div>
+        <div class="bpe-h">Merges learned (<span id="bpe-count">0</span>)</div>
+        <div id="bpe-merges" class="bpe-merges">—</div>
+      </div>
+    </div>
+    <div class="bpe-h" style="margin-top:14px">Sample names, tokenized with the merges so far</div>
+    <div class="ctx" id="bpe-sample"></div>
+    <div class="demo-foot">
+      <button class="btn" id="bpe-step" type="button">Apply next merge</button>
+      <button class="btn ghost" id="bpe-run" type="button">Run 10 merges</button>
+      <button class="btn ghost" id="bpe-reset" type="button">↺ Reset</button>
+      <span class="demo-note" id="bpe-note">Each click performs one merge: the most frequent pair becomes a single new token.</span>
+    </div>
+  </div>
+  <p style="margin-top:16px">Run against all 32,033 names, 40 merges shorten the average name from 6.12 tokens to 4.39 — <strong>28% less sequence to compute</strong>. Frontier tokenizers push the same lever to ~100,000–200,000 tokens (built from raw bytes, so <em>any</em> input tokenizes — no out-of-vocabulary errors), producing tokens like <code>" the"</code>, <code>"ing"</code>, even whole common words.</p>
+
+  <h2 id="consequences"><span class="sec">§2.3</span> Tokenization explains LLM quirks</h2>
+  <p>Once merged, a token is <strong>atomic</strong> — the model receives ID 3,204, not the letters inside it. This single fact explains a family of famous LLM failures:</p>
+  <p><strong>Counting letters.</strong> Ask a model how many r's are in "strawberry" and it must reason about characters it literally cannot see — <code>straw</code>+<code>berry</code> arrives as two opaque IDs. It only knows the spelling if training text happened to discuss it.</p>
+  <p><strong>Arithmetic.</strong> "1234" might tokenize as <code>12</code>+<code>34</code> one time and <code>123</code>+<code>4</code> another — the model has to learn math over inconsistent chunks.</p>
+  <p><strong>Cost and context.</strong> API pricing, context windows, generation speed — all counted in tokens, because tokens are the true unit the model computes over. (Danish costs more tokens per sentence than English: fewer Danish merges made it into the vocabulary.)</p>
+
+  <h2 id="ch2-build"><span class="sec">§2.4</span> The build</h2>
+  <div class="files">
+llm/<br>
+├── src/CharacterTokenizer.php&nbsp;<span class="you">← fromText / encode / decode</span><br>
+├── src/BytePairEncoder.php&nbsp;&nbsp;&nbsp;&nbsp;<span class="you">← train / tokenizeWord / merges</span><br>
+├── bin/explore-tokenizer.php&nbsp;&nbsp;<span class="dim">tour both tokenizers on the names corpus</span><br>
+├── data/names.txt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">32,033 names — our dataset for chapters 3–6</span><br>
+└── tests/check-ch2.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">10 checks: round-trips, merge order, edge cases</span>
+  </div>
+  <p>Reading order: <code>CharacterTokenizer.php</code> first — it's short and every line matters. Then <code>BytePairEncoder::train()</code>: the whole algorithm is <em>count pairs → pick the winner → glue it everywhere → repeat</em>. Run the tour:</p>
+  <pre><code>php tests/check-ch2.php
+php bin/explore-tokenizer.php</code></pre>
+  <div class="check"><span class="tag">Result</span><br>
+  All 10 checks pass. BPE's first learned merges on the names corpus: <code>an</code>, <code>ar</code>, <code>el</code>, <code>le</code>, <code>on</code>, <code>en</code> — it rediscovered the building blocks of names with no linguistics, just counting. <code>mathias</code> → <code>[ma][th][i][a][s]</code>.</div>
+
+  <h2 id="ch2-quiz"><span class="sec">§2.5</span> Checkpoint quiz</h2>
+
+  <div class="quiz" data-why="Right — after encoding, the model receives opaque integer IDs. \"straw\" is just some number; the letters inside are invisible unless training data happened to spell them out. Tokenization, not stupidity, is why letter-counting fails.">
+    <div class="q">1. After BPE merges "straw" into one token, what does the model know about the letters inside it?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">It can look at the characters when needed</button>
+      <button class="qopt" type="button" data-right>Nothing directly — the token arrives as an opaque ID; letter knowledge only comes from training data</button>
+      <button class="qopt" type="button">Letters are stored alongside each token ID</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Exactly — one rule, applied greedily: count every adjacent pair across the corpus, merge the most frequent one, repeat. Everything real tokenizers do is elaboration on that loop.">
+    <div class="q">2. Which pair does BPE merge at each step?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">The pair that makes the most linguistic sense</button>
+      <button class="qopt" type="button">A random pair, kept if it helps compression</button>
+      <button class="qopt" type="button" data-right>Simply the most frequent adjacent pair in the corpus right now</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Yes — a bigger vocabulary means shorter sequences (less compute per text) but more rows in the embedding table to learn, and rare tokens get seen less often during training. Every tokenizer picks a point on that curve; frontier models sit around 100k–200k.">
+    <div class="q">3. What's the trade-off in growing the vocabulary from 27 characters to 100,000 BPE tokens?</div>
+    <div class="qopts">
+      <button class="qopt" type="button" data-right>Shorter sequences to compute, but more parameters to learn and rarer sightings of each token</button>
+      <button class="qopt" type="button">None — bigger vocabularies are strictly better</button>
+      <button class="qopt" type="button">Bigger vocabularies make decoding ambiguous</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="next"><span class="tag">When you're ready</span>
+  <p style="margin:8px 0 0">Play with both demos, skim the two classes, then tell Claude <strong>"chapter 2 done"</strong> (questions welcome first). Next: <em>the bigram model</em> — our first machine that <strong>generates</strong> names, built from nothing but counting.</p></div>
+</section>
 </main>
 </div>
 
@@ -416,6 +529,120 @@ php bin/bench.php
     plDetail.innerHTML = '<span class="ch">' + s[3] + '</span><p>' + s[1] + '</p><div class="ex">' + s[2].replace(/</g, '&lt;') + '</div>';
   }
   selectStage(0);
+
+  // ---------- ch2: live character tokenizer ----------
+  var VOCAB = '\n' + 'abcdefghijklmnopqrstuvwxyz'; // index in this string = token ID
+  var tkInput = document.getElementById('tk-input'), tkTokens = document.getElementById('tk-tokens'),
+      tkNote = document.getElementById('tk-note');
+  function renderTokenizer() {
+    var text = tkInput.value; tkTokens.innerHTML = '';
+    var ids = [], unknown = 0;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i], id = VOCAB.indexOf(ch);
+      var chip = document.createElement('span');
+      if (id >= 0) {
+        chip.className = 'tok'; chip.innerHTML = ch + '<small>' + id + '</small>'; ids.push(id);
+      } else {
+        chip.className = 'tok bad';
+        chip.innerHTML = (ch === ' ' ? '␣' : ch) + '<small>?</small>'; unknown++;
+      }
+      tkTokens.appendChild(chip);
+    }
+    tkNote.textContent = text.length === 0 ? 'Type something…'
+      : unknown > 0
+        ? 'Red pieces (spaces, capitals, punctuation) are not in our 27-token vocabulary — encode() would throw. Real tokenizers work on raw bytes precisely so this can never happen.'
+        : text.length + ' characters → encode() → [' + ids.join(', ') + ']';
+  }
+  tkInput.addEventListener('input', renderTokenizer);
+  renderTokenizer();
+
+  // ---------- ch2: BPE step-through ----------
+  var NAMES = ['emma','olivia','ava','isabella','sophia','charlotte','mia','amelia','harper','evelyn',
+    'abigail','emily','elizabeth','mila','ella','avery','sofia','camila','aria','scarlett',
+    'victoria','madison','luna','grace','chloe','penelope','layla','riley','zoey','nora',
+    'lily','eleanor','hannah','lillian','addison','aubrey','ellie','stella','natalie','zoe'];
+  var SAMPLE = ['isabella','charlotte','elizabeth','penelope','eleanor','natalie'];
+  var bpeWords, bpeMerges;
+  var pairsEl = document.getElementById('bpe-pairs'), mergesEl = document.getElementById('bpe-merges'),
+      sampleEl = document.getElementById('bpe-sample'), bpeNote = document.getElementById('bpe-note'),
+      countEl = document.getElementById('bpe-count');
+
+  function bpeReset() {
+    bpeWords = NAMES.map(function (n) { return n.split(''); });
+    bpeMerges = [];
+    bpeNote.textContent = 'Each click performs one merge: the most frequent pair becomes a single new token.';
+    renderBpe();
+  }
+  function pairCounts() {
+    var counts = {};
+    bpeWords.forEach(function (tokens) {
+      for (var i = 0; i < tokens.length - 1; i++) {
+        var key = tokens[i] + '' + tokens[i + 1];
+        counts[key] = (counts[key] || 0) + 1;
+      }
+    });
+    return Object.keys(counts).map(function (k) {
+      var p = k.split(''); return { first: p[0], second: p[1], count: counts[k] };
+    }).sort(function (a, b) { return b.count - a.count; });
+  }
+  function bpeStep(quiet) {
+    var top = pairCounts()[0];
+    if (!top || top.count < 2) { bpeNote.textContent = 'No pair appears twice anymore — nothing useful left to merge.'; return; }
+    bpeWords = bpeWords.map(function (tokens) {
+      var out = [], i = 0;
+      while (i < tokens.length) {
+        if (i < tokens.length - 1 && tokens[i] === top.first && tokens[i + 1] === top.second) {
+          out.push(top.first + top.second); i += 2;
+        } else { out.push(tokens[i]); i += 1; }
+      }
+      return out;
+    });
+    bpeMerges.push(top);
+    if (!quiet) bpeNote.textContent = 'Merged "' + top.first + '" + "' + top.second + '" → "' + top.first + top.second + '" (appeared ' + top.count + ' times).';
+    renderBpe();
+  }
+  function renderBpe() {
+    var pairs = pairCounts().slice(0, 5), max = pairs.length ? pairs[0].count : 1;
+    pairsEl.innerHTML = '';
+    pairs.forEach(function (p) {
+      var row = document.createElement('div'); row.className = 'prow';
+      row.innerHTML = '<span>"' + p.first + '"+"' + p.second + '"</span><span class="bar"><i style="width:' +
+        (p.count / max * 100) + '%"></i></span><span class="cnt">' + p.count + '×</span>';
+      pairsEl.appendChild(row);
+    });
+    countEl.textContent = bpeMerges.length;
+    mergesEl.innerHTML = bpeMerges.length === 0 ? '—'
+      : bpeMerges.map(function (m) { return '<span class="mg">' + m.first + m.second + '</span>'; }).join('');
+    sampleEl.innerHTML = '';
+    SAMPLE.forEach(function (name) {
+      var tokens = name.split('');
+      bpeMerges.forEach(function (m) {
+        var out = [], i = 0;
+        while (i < tokens.length) {
+          if (i < tokens.length - 1 && tokens[i] === m.first && tokens[i + 1] === m.second) {
+            out.push(m.first + m.second); i += 2;
+          } else { out.push(tokens[i]); i += 1; }
+        }
+        tokens = out;
+      });
+      var wrap = document.createElement('span');
+      wrap.style.marginRight = '10px';
+      tokens.forEach(function (t) {
+        var chip = document.createElement('span');
+        chip.className = 'tok' + (t.length > 1 ? ' new' : '');
+        chip.textContent = t;
+        wrap.appendChild(chip);
+      });
+      sampleEl.appendChild(wrap);
+    });
+  }
+  document.getElementById('bpe-step').addEventListener('click', function () { bpeStep(false); });
+  document.getElementById('bpe-run').addEventListener('click', function () {
+    for (var i = 0; i < 10; i++) bpeStep(true);
+    bpeNote.textContent = 'Ran 10 merges — multi-character tokens are highlighted in the samples.';
+  });
+  document.getElementById('bpe-reset').addEventListener('click', bpeReset);
+  bpeReset();
 
   // ---------- quiz ----------
   document.querySelectorAll('.quiz').forEach(function (q) {
