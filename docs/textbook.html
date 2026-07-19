@@ -206,8 +206,8 @@
     <li><a href="#ch2"><span class="num">02</span>Tokenization ✓</a></li>
     <li><a href="#ch3"><span class="num">03</span>The bigram model ✓</a></li>
     <li><a href="#ch4"><span class="num">04</span>Autograd ✓</a></li>
-    <li><a class="here" href="#ch5" aria-current="page"><span class="num">05</span>Tensors</a></li>
-    <li><span class="locked"><span class="num">06</span>MLP language model</span></li>
+    <li><a href="#ch5"><span class="num">05</span>Tensors ✓</a></li>
+    <li><a class="here" href="#ch6" aria-current="page"><span class="num">06</span>MLP language model</a></li>
     <li><span class="locked"><span class="num">07</span>Self-attention</span></li>
     <li><span class="locked"><span class="num">08</span>The Transformer</span></li>
     <li><span class="locked"><span class="num">09</span>Inference</span></li>
@@ -261,8 +261,8 @@
     <div class="mcard"><div class="mnum">CH 02 — DONE ✓</div><div class="mtitle">Tokenization</div><div class="mwhat">Text → numbers. A character tokenizer, then mini-BPE like the real ones.</div></div>
     <div class="mcard"><div class="mnum">CH 03 — DONE ✓</div><div class="mtitle">The bigram model</div><div class="mwhat">A counting-based name generator. Your first generative model — no neural net.</div></div>
     <div class="mcard"><div class="mnum">CH 04 — DONE ✓</div><div class="mtitle">Autograd</div><div class="mwhat">Backpropagation from scratch: a Value class that computes its own gradients.</div></div>
-    <div class="mcard here"><div class="mnum">CH 05 — YOU ARE HERE</div><div class="mtitle">Tensors</div><div class="mwhat">Matrix ops, softmax, cross-entropy. The bigram reborn as a trained network.</div></div>
-    <div class="mcard dim"><div class="mnum">CH 06</div><div class="mtitle">MLP language model</div><div class="mwhat">Context windows, hidden layers, the training loop, overfitting.</div></div>
+    <div class="mcard"><div class="mnum">CH 05 — DONE ✓</div><div class="mtitle">Tensors</div><div class="mwhat">Matrix ops, softmax, cross-entropy. The bigram reborn as a trained network.</div></div>
+    <div class="mcard here"><div class="mnum">CH 06 — YOU ARE HERE</div><div class="mtitle">MLP language model</div><div class="mwhat">Context windows, hidden layers, the training loop, overfitting.</div></div>
     <div class="mcard dim"><div class="mnum">CH 07</div><div class="mtitle">Self-attention</div><div class="mwhat">The heart of the transformer, with heatmaps rendered from your own model.</div></div>
     <div class="mcard dim"><div class="mnum">CH 08</div><div class="mtitle">The Transformer</div><div class="mwhat">Blocks, residuals, layer norm → a full GPT generating text.</div></div>
     <div class="mcard dim"><div class="mnum">CH 09</div><div class="mtitle">Inference</div><div class="mwhat">Temperature, top-k, KV-cache — why generation feels creative.</div></div>
@@ -722,8 +722,96 @@ llm/<br>
     <div class="qwhy"></div>
   </div>
 
+  <div class="next"><span class="tag">Chapter 5 complete ✓</span>
+  <p style="margin:8px 0 0">The learning machinery is proven. <a href="#ch6">Continue to Chapter 6: The MLP language model →</a></p></div>
+</section>
+
+<section id="ch6">
+  <hr>
+  <p class="eyebrow">Chapter 06 · The MLP language model</p>
+  <h1>The first model that generalizes.</h1>
+  <p class="lede">Three characters of context, 6,899 parameters, and two new superpowers: embeddings (so knowledge transfers between similar contexts) and a validation set (so we can't fool ourselves). The bigram ceiling falls: 2.4546 → <strong>2.1932</strong>.</p>
+
+  <h2 id="embed-idea"><span class="sec">§6.1</span> Embeddings: the escape from the table</h2>
+  <p>Chapter 3 ended on the wall: three characters of context as a lookup table needs 27³ ≈ 20k rows, most never seen. The 2003 escape (Bengio's neural language model — this chapter's architecture) is to stop treating characters as table indices and start treating them as <strong>learned vectors</strong>. Each character gets a handful of numbers — its <em>embedding</em> — and the model reads the window as vectors, not IDs.</p>
+  <p>Why that fixes generalization: if <code>k</code> and <code>c</code> end up with similar vectors (they behave alike before <code>a</code>), then everything learned about <code>ka…</code> contexts <em>automatically transfers</em> to <code>ca…</code> contexts — even ones never seen in training. Knowledge is shared through vector-space geometry instead of stranded in separate table rows.</p>
+  <p>And it isn't hypothetical. We trained a version whose embeddings have just 2 dimensions, so every character is literally a point on a plane you can look at. Here is what gradient descent — told nothing about English, phonetics, or letters — chose:</p>
+
+  <div class="demo">
+    <div class="demo-label">The learned embedding plane (real coordinates from bin/train-mlp.php)</div>
+    <canvas id="em-canvas" width="1240" height="640" style="width:100%;height:auto;border-radius:6px"></canvas>
+    <p class="demo-note" style="margin:10px 0 0">Every <span style="color:var(--amber);font-weight:700">vowel</span> migrated to the top of the plane; every consonant stayed below. Nobody told the model what a vowel is — vowels simply <em>get used the same way</em> in names, so the loss pushed their vectors together. Note <code>y</code> hovering between the clusters (a part-time vowel, mathematically confirmed) and the name-boundary <code>·</code> far off on its own. This — meaning arising as geometry — is the same mechanism that makes "king − man + woman ≈ queen" work in word embeddings, and it is happening in your PHP.</p>
+  </div>
+
+  <h2 id="mlp-arch"><span class="sec">§6.2</span> The architecture</h2>
+  <p>Forward pass, in the order <code>computeLogits()</code> reads:</p>
+  <div class="pipeline"><span class="pl-stage">[·, e, m] window</span><span class="pl-arrow">→</span><span class="pl-stage">embed &amp; concatenate (24 numbers)</span><span class="pl-arrow">→</span><span class="pl-stage">× hiddenWeights + bias</span><span class="pl-arrow">→</span><span class="pl-stage">tanh (128 neurons)</span><span class="pl-arrow">→</span><span class="pl-stage">× outputWeights + bias</span><span class="pl-arrow">→</span><span class="pl-stage">27 logits</span></div>
+  <p>The hidden layer is chapter 4's tanh neurons in matrix form: each of the 128 neurons looks at the whole 24-number context and learns to fire on some useful pattern. One initialization subtlety worth knowing (it's in the constructor comment): weights are scaled by 1/√fan-in so early activations land in tanh's responsive zone rather than its flat tails — badly initialized networks die before they learn, and this tiny formula is the difference.</p>
+
+  <h2 id="val"><span class="sec">§6.3</span> The exam the model can't cheat</h2>
+  <p>New discipline from this chapter on: we hold out 10% of the names (3,203 of them) that the model <strong>never sees during training</strong>. Loss on seen data measures memory; loss on held-out data measures <em>generalization</em>. A big enough model can drive training loss toward zero by memorizing the dataset — validation loss is the score that can't be gamed, and it's the only number we'll brag about. (Split by whole name, not by window, or overlapping windows would leak exam questions into the study material.)</p>
+
+  <div class="demo">
+    <div class="demo-label">The real training run — 6,000 steps, evaluated every 250</div>
+    <canvas id="lc-canvas" width="1240" height="480" style="width:100%;height:auto;border-radius:6px"></canvas>
+    <p class="demo-note" style="margin:10px 0 0">The jagged line is per-batch loss (noisy — every batch is a different random 400 examples). The smooth line is validation loss. See the cliff at step 4,000: that's the learning rate dropping 0.5 → 0.05 — smaller, careful steps settle deeper into the valley. And watch the two lines hug: training 2.1633 vs validation 2.1932. A tiny gap means we are not yet memorizing; when the gap yawns, you're overfitting.</p>
+  </div>
+
+  <h2 id="mlp-results"><span class="sec">§6.4</span> Results: the ceiling falls</h2>
+  <div class="scale" style="margin:20px 0">
+    <div class="srow"><span>Know-nothing</span><span class="bar"><i style="width:100%"></i></span><span class="val">3.2958</span></div>
+    <div class="srow"><span>Bigram (ch 3)</span><span class="bar"><i style="width:74%"></i></span><span class="val">2.4546</span></div>
+    <div class="srow us"><span>MLP (ch 6)</span><span class="bar"><i style="width:57%"></i></span><span class="val">2.1932</span></div>
+    <div class="srow"><span>Transformer (ch 8)</span><span class="bar"><i style="width:50%"></i></span><span class="val">soon</span></div>
+  </div>
+  <p>And the names show it. Bigram: <em>quravah, sennn, nnanienann</em>. MLP: <em>jemmisha, yushamina, kawana, shrimla, miria, soriek</em> — and <em>kenya</em>, an actual name it was never guaranteed to see. Three characters of context killed the letter-streak garbage entirely; the remaining weirdness (<em>oaf</em>, <em>smarnayiah</em>) is what "can't see past 3 characters" looks like.</p>
+
+  <h2 id="ch6-build"><span class="sec">§6.5</span> The build</h2>
+  <div class="files">
+llm/<br>
+├── src/MultiLayerPerceptronLanguageModel.php&nbsp;<span class="you">← the whole model; computeLogits() is the spine</span><br>
+├── src/Tensor.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="you">← + selectAndConcatenateRows (the window lookup)</span><br>
+├── bin/train-mlp.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">the full run: split, train, evaluate, generate (~2.5 min)</span><br>
+└── tests/check-ch6.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">8 checks incl. memorize-a-toy-sequence</span>
+  </div>
+  <pre><code>php tests/check-ch6.php
+./bin/phpj bin/train-mlp.php</code></pre>
+  <p>Reading guide: <code>computeLogits()</code> is six chained calls — the entire model. Then <code>bin/train-mlp.php</code> top to bottom: the split, the window-building (watch "emma" become five examples), and the loop you've now seen three times: batch → loss → backward → step.</p>
+
+  <h2 id="ch6-quiz"><span class="sec">§6.6</span> Checkpoint quiz</h2>
+
+  <div class="quiz" data-why="Right — similar characters get similar vectors, so patterns learned on contexts containing one transfer to contexts containing the other, including combinations never seen in training. A table has no notion of 'similar rows'; vector geometry is what buys generalization.">
+    <div class="q">1. Why do embeddings solve the exploding-table problem where counting couldn't?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">They compress the table so it fits in memory</button>
+      <button class="qopt" type="button" data-right>Characters that behave alike get similar vectors, so knowledge transfers to unseen contexts</button>
+      <button class="qopt" type="button">They make the vocabulary smaller</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Exactly — training loss can be driven down by pure memorization, which is worthless for new data. Validation loss is measured on names the model never trained on, so the only way to score well is to have learned the actual patterns of the language.">
+    <div class="q">2. Why is validation loss the only number we brag about?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">It's always lower than training loss</button>
+      <button class="qopt" type="button">It's faster to compute than training loss</button>
+      <button class="qopt" type="button" data-right>Training loss can be gamed by memorizing; validation loss can only be earned by generalizing</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Yes — nobody labeled vowels. Vowels occupy similar slots in names, so giving them nearby vectors lets the network share what it learns about them, which lowers loss. Meaning emerged as geometry from the prediction pressure alone — the same force that builds concept structure inside frontier models.">
+    <div class="q">3. The 2-dim embedding map put all five vowels in one cluster. What put them there?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">The tokenizer groups vowels before training</button>
+      <button class="qopt" type="button" data-right>Gradient pressure: vowels are used interchangeably in names, and similar vectors let learning transfer between them</button>
+      <button class="qopt" type="button">Alphabetical ordering of the vocabulary</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
   <div class="next"><span class="tag">When you're ready</span>
-  <p style="margin:8px 0 0">Drag the softmax sliders (make it confidently wrong and watch the gradient), skim <code>Tensor.php</code> next to <code>Value.php</code>, then say <strong>"chapter 5 done"</strong>. Next: the <em>MLP language model</em> — real embeddings, a real context window, and the first model that beats the bigram ceiling.</p></div>
+  <p style="margin:8px 0 0">Study the embedding map, find the learning-rate cliff in the loss curve, read <code>computeLogits()</code>, then say <strong>"chapter 6 done"</strong>. Next: <em>self-attention</em> — the 2017 idea that replaced fixed windows with "every position looks at every earlier position", made GPT possible, and gives this course its transformer.</p></div>
 </section>
 </main>
 </div>
@@ -1225,6 +1313,62 @@ llm/<br>
     if (btn) { smTruth = parseInt(btn.dataset.truth, 10); smRender(); }
   });
   smRender();
+
+  // ---------- ch6: embedding map + loss curve ----------
+  var MLP = {"curve":[{"step":1,"batch":3.3139,"validation":3.2245},{"step":250,"batch":2.3743,"validation":2.4417},{"step":500,"batch":2.3337,"validation":2.3845},{"step":750,"batch":2.2679,"validation":2.3438},{"step":1000,"batch":2.255,"validation":2.3247},{"step":1250,"batch":2.2659,"validation":2.3097},{"step":1500,"batch":2.2604,"validation":2.2898},{"step":1750,"batch":2.2537,"validation":2.2845},{"step":2000,"batch":2.2181,"validation":2.2774},{"step":2250,"batch":2.3187,"validation":2.2624},{"step":2500,"batch":2.279,"validation":2.2606},{"step":2750,"batch":2.2245,"validation":2.2651},{"step":3000,"batch":2.1917,"validation":2.2548},{"step":3250,"batch":2.2733,"validation":2.2385},{"step":3500,"batch":2.2471,"validation":2.2367},{"step":3750,"batch":2.2046,"validation":2.2259},{"step":4000,"batch":2.169,"validation":2.2337},{"step":4250,"batch":2.0765,"validation":2.2},{"step":4500,"batch":2.1901,"validation":2.1986},{"step":4750,"batch":2.1117,"validation":2.1976},{"step":5000,"batch":2.208,"validation":2.1971},{"step":5250,"batch":2.2477,"validation":2.196},{"step":5500,"batch":2.2049,"validation":2.1944},{"step":5750,"batch":2.1241,"validation":2.195},{"step":6000,"batch":2.1391,"validation":2.1932}],"finalTrainingLoss":2.1633,"finalValidationLoss":2.1932,"samples":["adupie","caes","jemmisha","kus","karghanni","yushamina","jua","chenakan","arorge","shrimla","oaf","jerria","kawana","smarnayiah","shanl","miria","kenya","kingta","samaharl","soriek"],"embeddingPoints":[{"character":"\u00b7","x":3.5691,"y":0.1918},{"character":"a","x":0.2521,"y":2.9526},{"character":"b","x":0.4418,"y":-0.0074},{"character":"c","x":0.8041,"y":-0.4426},{"character":"d","x":0.1113,"y":-0.6073},{"character":"e","x":-0.4822,"y":1.8353},{"character":"f","x":0.2078,"y":-0.4671},{"character":"g","x":0.7358,"y":-0.1661},{"character":"h","x":-0.5619,"y":-0.3561},{"character":"i","x":-0.8372,"y":1.0403},{"character":"j","x":-0.882,"y":-0.9438},{"character":"k","x":0.1599,"y":-0.5879},{"character":"l","x":-1.1871,"y":-2.5174},{"character":"m","x":-0.3405,"y":-0.8428},{"character":"n","x":-2.2015,"y":-0.6844},{"character":"o","x":-0.6803,"y":2.6707},{"character":"p","x":0.8434,"y":-0.4008},{"character":"q","x":0.0052,"y":-0.6926},{"character":"r","x":-1.4388,"y":-1.5056},{"character":"s","x":0.5013,"y":-0.226},{"character":"t","x":0.5532,"y":-0.3302},{"character":"u","x":-0.1504,"y":1.3888},{"character":"v","x":0.0757,"y":-1.4384},{"character":"w","x":-0.186,"y":-0.5557},{"character":"x","x":0.0215,"y":-0.2402},{"character":"y","x":-1.2536,"y":0.5196},{"character":"z","x":-0.3966,"y":-0.8525}]}; // injected from docs/mlp-training.json (real training run)
+  (function drawEmbeddingMap() {
+    var canvas = document.getElementById('em-canvas'), context = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height, pad = 60;
+    var xs = MLP.embeddingPoints.map(function (p) { return p.x; }), ys = MLP.embeddingPoints.map(function (p) { return p.y; });
+    var xMin = Math.min.apply(null, xs), xMax = Math.max.apply(null, xs);
+    var yMin = Math.min.apply(null, ys), yMax = Math.max.apply(null, ys);
+    context.fillStyle = cssVar('--card'); context.fillRect(0, 0, w, h);
+    context.strokeStyle = cssVar('--line'); context.lineWidth = 1;
+    for (var gx = 0; gx <= 4; gx++) {
+      context.beginPath(); context.moveTo(pad + gx * (w - 2 * pad) / 4, pad); context.lineTo(pad + gx * (w - 2 * pad) / 4, h - pad); context.stroke();
+      context.beginPath(); context.moveTo(pad, pad + gx * (h - 2 * pad) / 4); context.lineTo(w - pad, pad + gx * (h - 2 * pad) / 4); context.stroke();
+    }
+    context.font = '700 30px ui-monospace, monospace'; context.textAlign = 'center'; context.textBaseline = 'middle';
+    MLP.embeddingPoints.forEach(function (p) {
+      var px = pad + (p.x - xMin) / (xMax - xMin) * (w - 2 * pad);
+      var py = h - pad - (p.y - yMin) / (yMax - yMin) * (h - 2 * pad);
+      var isVowel = 'aeiou'.indexOf(p.character) >= 0;
+      context.fillStyle = isVowel ? cssVar('--amber') : p.character === '·' ? cssVar('--muted') : cssVar('--ink');
+      if (isVowel) { context.beginPath(); context.arc(px, py, 24, 0, 7); context.strokeStyle = cssVar('--amber'); context.lineWidth = 2; context.stroke(); }
+      context.fillText(p.character, px, py);
+    });
+  })();
+  (function drawLossCurve() {
+    var canvas = document.getElementById('lc-canvas'), context = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height, pad = 56;
+    var steps = MLP.curve.map(function (p) { return p.step; });
+    var maxStep = Math.max.apply(null, steps);
+    var yMin = 2.0, yMax = 3.4;
+    var toX = function (s) { return pad + s / maxStep * (w - 2 * pad); };
+    var toY = function (l) { return h - pad - (Math.min(l, yMax) - yMin) / (yMax - yMin) * (h - 2 * pad); };
+    context.fillStyle = cssVar('--card'); context.fillRect(0, 0, w, h);
+    context.strokeStyle = cssVar('--line');
+    [2.0, 2.4, 2.8, 3.2].forEach(function (l) {
+      context.beginPath(); context.moveTo(pad, toY(l)); context.lineTo(w - pad, toY(l)); context.stroke();
+      context.fillStyle = cssVar('--muted'); context.font = '20px ui-monospace, monospace'; context.textAlign = 'left';
+      context.fillText(l.toFixed(1), 8, toY(l) + 6);
+    });
+    context.fillText('bigram 2.4546 —', pad + 8, toY(2.4546) - 8);
+    context.setLineDash([6, 6]); context.strokeStyle = cssVar('--muted');
+    context.beginPath(); context.moveTo(toX(4000), pad); context.lineTo(toX(4000), h - pad); context.stroke();
+    context.setLineDash([]);
+    context.fillText('learning rate ÷10 →', toX(4000) - 250, pad + 16);
+    var drawLine = function (key, color, width) {
+      context.strokeStyle = color; context.lineWidth = width; context.beginPath();
+      MLP.curve.forEach(function (p, i) {
+        i === 0 ? context.moveTo(toX(p.step), toY(p[key])) : context.lineTo(toX(p.step), toY(p[key]));
+      });
+      context.stroke();
+    };
+    drawLine('batch', cssVar('--muted'), 2);
+    drawLine('validation', cssVar('--accent'), 4);
+    context.fillStyle = cssVar('--accent'); context.fillText('validation', w - pad - 130, toY(MLP.curve[MLP.curve.length - 1].validation) - 12);
+  })();
 
   // ---------- quiz ----------
   document.querySelectorAll('.quiz').forEach(function (q) {

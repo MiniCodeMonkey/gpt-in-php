@@ -196,6 +196,45 @@ final class Tensor
     }
 
     /**
+     * The chapter 6 upgrade of selectRows: fetch SEVERAL rows per example and
+     * lay them side by side. For context window [5, 13, 13] ("emm") and a
+     * 27×8 embedding table, the result row is 24 numbers: e's vector, then
+     * m's, then m's again — a whole context packed into one flat row, ready
+     * to feed a neural network. Backward scatters each slice back onto the
+     * embedding row it came from (m's row collects from both uses).
+     *
+     * @param array<int, array<int, int>> $rowIndexGroups one group of row indices per example
+     */
+    public function selectAndConcatenateRows(array $rowIndexGroups): self
+    {
+        $columnCount = $this->columnCount();
+        $data = [];
+        foreach ($rowIndexGroups as $i => $rowIndices) {
+            $flat = [];
+            foreach ($rowIndices as $rowIndex) {
+                foreach ($this->data[$rowIndex] as $value) {
+                    $flat[] = $value;
+                }
+            }
+            $data[$i] = $flat;
+        }
+        $result = new self($data);
+        $result->parents = [$this];
+        $result->backwardFunction = function () use ($rowIndexGroups, $columnCount, $result): void {
+            foreach ($rowIndexGroups as $i => $rowIndices) {
+                foreach ($rowIndices as $position => $rowIndex) {
+                    $offset = $position * $columnCount;
+                    for ($column = 0; $column < $columnCount; $column++) {
+                        $this->gradient[$rowIndex][$column] += $result->gradient[$i][$offset + $column];
+                    }
+                }
+            }
+        };
+
+        return $result;
+    }
+
+    /**
      * The final step of every language model, fused into one operation:
      * softmax (scores → probabilities) + cross-entropy (chapter 3's loss).
      *
