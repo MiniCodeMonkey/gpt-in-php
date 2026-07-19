@@ -205,8 +205,8 @@
     <li><a href="#ch1"><span class="num">01</span>The map ✓</a></li>
     <li><a href="#ch2"><span class="num">02</span>Tokenization ✓</a></li>
     <li><a href="#ch3"><span class="num">03</span>The bigram model ✓</a></li>
-    <li><a class="here" href="#ch4" aria-current="page"><span class="num">04</span>Autograd</a></li>
-    <li><span class="locked"><span class="num">05</span>Tensors</span></li>
+    <li><a href="#ch4"><span class="num">04</span>Autograd ✓</a></li>
+    <li><a class="here" href="#ch5" aria-current="page"><span class="num">05</span>Tensors</a></li>
     <li><span class="locked"><span class="num">06</span>MLP language model</span></li>
     <li><span class="locked"><span class="num">07</span>Self-attention</span></li>
     <li><span class="locked"><span class="num">08</span>The Transformer</span></li>
@@ -260,8 +260,8 @@
     <div class="mcard"><div class="mnum">CH 01 — DONE ✓</div><div class="mtitle">The map</div><div class="mwhat">The big idea, the pipeline, and a benchmark: this Mac's PHP FLOP/s.</div></div>
     <div class="mcard"><div class="mnum">CH 02 — DONE ✓</div><div class="mtitle">Tokenization</div><div class="mwhat">Text → numbers. A character tokenizer, then mini-BPE like the real ones.</div></div>
     <div class="mcard"><div class="mnum">CH 03 — DONE ✓</div><div class="mtitle">The bigram model</div><div class="mwhat">A counting-based name generator. Your first generative model — no neural net.</div></div>
-    <div class="mcard here"><div class="mnum">CH 04 — YOU ARE HERE</div><div class="mtitle">Autograd</div><div class="mwhat">Backpropagation from scratch: a Value class that computes its own gradients.</div></div>
-    <div class="mcard dim"><div class="mnum">CH 05</div><div class="mtitle">Tensors</div><div class="mwhat">Matrix ops, softmax, cross-entropy. The bigram reborn as a trained network.</div></div>
+    <div class="mcard"><div class="mnum">CH 04 — DONE ✓</div><div class="mtitle">Autograd</div><div class="mwhat">Backpropagation from scratch: a Value class that computes its own gradients.</div></div>
+    <div class="mcard here"><div class="mnum">CH 05 — YOU ARE HERE</div><div class="mtitle">Tensors</div><div class="mwhat">Matrix ops, softmax, cross-entropy. The bigram reborn as a trained network.</div></div>
     <div class="mcard dim"><div class="mnum">CH 06</div><div class="mtitle">MLP language model</div><div class="mwhat">Context windows, hidden layers, the training loop, overfitting.</div></div>
     <div class="mcard dim"><div class="mnum">CH 07</div><div class="mtitle">Self-attention</div><div class="mwhat">The heart of the transformer, with heatmaps rendered from your own model.</div></div>
     <div class="mcard dim"><div class="mnum">CH 08</div><div class="mtitle">The Transformer</div><div class="mwhat">Blocks, residuals, layer norm → a full GPT generating text.</div></div>
@@ -639,8 +639,91 @@ php bin/train-tiny-network.php</code></pre>
     <div class="qwhy"></div>
   </div>
 
+  <div class="next"><span class="tag">Chapter 4 complete ✓</span>
+  <p style="margin:8px 0 0">Machines can learn now. <a href="#ch5">Continue to Chapter 5: Tensors →</a></p></div>
+</section>
+
+<section id="ch5">
+  <hr>
+  <p class="eyebrow">Chapter 05 · Tensors</p>
+  <h1>The same engine, a thousand numbers at a time.</h1>
+  <p class="lede">Chapter 4's Value is beautiful and hopelessly slow: one PHP object per number. This chapter promotes the identical three ideas to whole matrices — then proves the machinery by making gradient descent rediscover chapter 3's bigram table from pure noise.</p>
+
+  <h2 id="why-tensors"><span class="sec">§5.1</span> Why scalars don't scale</h2>
+  <p>Training XOR built a graph of a few hundred Value objects. A bigram-sized language model on one 2,000-pair batch would need <em>millions</em> of nodes per step — each an allocated PHP object with parents and a closure. The overhead isn't the math; it's the bookkeeping <em>per number</em>.</p>
+  <p>The fix: keep the autograd design — remember parents, know your local derivative, walk backwards — but make each graph node carry a whole <strong>matrix</strong>. Bookkeeping is now paid per <em>operation</em>, and inside each operation there's nothing but tight float loops (which the JIT compiles to native code, chapter 1's lesson). <code>src/Tensor.php</code> is <code>Value.php</code> with plurals.</p>
+  <p>There's a deeper reason too: a layer of neurons processing a batch of inputs <em>is</em> a matrix multiplication — every neuron × every input, all independent. That's why <code>Matrix::multiply</code> will own ~95% of our runtime, and why hardware built to do nothing but parallel matrix math (GPUs) turned out to be the key that unlocked deep learning.</p>
+  <div class="aside"><span class="tag">Matrix gradients are one pattern</span>
+  For <code>C = A·B</code>: gradient of A is <code>Cgrad·Bᵀ</code>, gradient of B is <code>Aᵀ·Cgrad</code> — "multiply: the other factor", matrix-shaped. We don't take it on faith: the check suite nudges individual entries by 0.000001 and confirms backprop to seven decimals, same as chapter 4.</div>
+
+  <h2 id="softmax"><span class="sec">§5.2</span> Softmax: from scores to probabilities</h2>
+  <p>A model's last layer produces one raw score per vocabulary token — called <strong>logits</strong>. Scores can be any number, but sampling needs a probability distribution: all positive, summing to 1. <strong>Softmax</strong> is the converter: exponentiate every score (now all positive, and bigger scores pull ahead <em>fast</em>), then divide by the total. Feel how it behaves:</p>
+
+  <div class="demo">
+    <div class="demo-label">Softmax + cross-entropy, live — drag scores, click a bar to mark what actually came next</div>
+    <div id="sm-rows"></div>
+    <div class="demo-foot"><span class="demo-note" id="sm-note">Loss = −ln(probability the model gave the true token). The amber numbers are the gradient softmax+CE sends back: probability − 1 on the true token, probability on the rest.</span></div>
+  </div>
+  <p style="margin-top:16px">Now the punchline that makes every framework fuse these two operations. Softmax followed by chapter 3's loss has a combined gradient of, literally, <code>probabilities − one-hot(truth)</code>: <em>"push the true token's score up by (1 − its probability); push every wrong score down by its own probability."</em> Pages of calculus collapse into subtraction — watch it in the amber numbers above: confident-and-right barely moves anything, confident-and-wrong yanks hard. Learning pressure ∝ surprise.</p>
+
+  <h2 id="embeddings"><span class="sec">§5.3</span> selectRows: the embedding idea sneaks in</h2>
+  <p>One more tensor operation and it's the sly one: <code>selectRows([13, 1, 20])</code> fetches rows 13, 1, 20 of a matrix. Token IDs go in, <em>the rows belonging to those tokens</em> come out. When the matrix is learnable, each token's row becomes that token's private bundle of learned numbers — its <strong>embedding</strong>, the "vectors that encode meaning" from chapter 1's pipeline. In this chapter each row holds the token's next-character scores; in chapter 6 rows become genuine meaning-vectors that feed a deeper network. Backward, gradients scatter onto exactly the rows that were used — popular tokens get trained often, rare ones rarely (why frontier models are shakiest on rare tokens).</p>
+
+  <h2 id="rediscovery"><span class="sec">§5.4</span> The experiment: rediscovering chapter 3 from noise</h2>
+  <p>Full circle. The model: a single 27×27 weight matrix — row = current character, column = score for each next character. Forward: <code>selectRows → softmaxCrossEntropy</code>. It's exactly the bigram table, but expressed as a differentiable function — and instead of counting, we start it as <strong>random noise</strong> and let gradient descent (minibatches of 2,000 pairs, learning-rate decay at step 1,000) find the numbers:</p>
+  <pre><code>Loss before training (random weights): 3.2962   ← the know-nothing baseline, as it must be
+  step    1   batch loss 3.2965
+  step  250   batch loss 2.4691
+  step 1500   batch loss 2.4916
+
+Final loss on ALL 228,146 pairs: 2.4588   (chapter 3, by counting: 2.4546)</code></pre>
+  <p>From pure noise, in 4.6 seconds, gradient descent reconstructed the counting table to within 0.004. The generated names are chapter-3 quality (<em>takeisotha, kannn</em>) — <strong>as they must be</strong>: same one-character context, same information, same ceiling. What changed is the recipe. Counting only works when the model <em>is</em> a lookup table; gradient descent works for <em>any architecture you can take gradients of</em>. Next chapter we use that freedom to finally widen the context — the thing counting could never do.</p>
+
+  <h2 id="ch5-build"><span class="sec">§5.5</span> The build</h2>
+  <div class="files">
+llm/<br>
+├── src/Tensor.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="you">← Value.php with plurals — compare them side by side</span><br>
+├── bin/train-neural-bigram.php&nbsp;&nbsp;<span class="dim">the rediscovery experiment (run with bin/phpj)</span><br>
+└── tests/check-ch5.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">9 checks: numerical verification, softmax properties</span>
+  </div>
+  <pre><code>php tests/check-ch5.php
+./bin/phpj bin/train-neural-bigram.php</code></pre>
+  <p>Reading guide: <code>softmaxCrossEntropy()</code> is the richest few lines in the file (note the subtract-the-max trick that stops <code>exp()</code> from overflowing — a real numerical-stability fix every framework does). Also worth a look: the check proving softmax gradients sum to zero per row — softmax can only <em>move</em> probability between tokens, never create it.</p>
+
+  <h2 id="ch5-quiz"><span class="sec">§5.6</span> Checkpoint quiz</h2>
+
+  <div class="quiz" data-why="Right — logits are unconstrained raw scores; softmax exponentiates (making everything positive, amplifying differences) and normalizes so they sum to 1. The model thinks in scores; sampling needs probabilities; softmax is the adapter between them.">
+    <div class="q">1. What problem does softmax solve?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">It makes training faster by simplifying the math</button>
+      <button class="qopt" type="button" data-right>It converts unconstrained raw scores into a valid probability distribution</button>
+      <button class="qopt" type="button">It picks the highest-scoring token</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Exactly — probability minus one-hot. If the model gave the truth 90%, the correction is a gentle 0.1; if it gave 2%, the yank is 0.98. Gradient magnitude IS surprise — the model learns hardest from what it got most wrong.">
+    <div class="q">2. The fused softmax + cross-entropy gradient on the TRUE token's logit is:</div>
+    <div class="qopts">
+      <button class="qopt" type="button">Always −1, to always push it up firmly</button>
+      <button class="qopt" type="button" data-right>Its probability − 1 — so the push is strong when the model was wrong, tiny when it was already confident</button>
+      <button class="qopt" type="button">The learning rate divided by the batch size</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Yes — and that equivalence is the point of the whole chapter. Same information in (one character of context), same loss out (~2.46). The neural version isn't better here; it's better because the recipe generalizes to architectures where counting is impossible — starting next chapter.">
+    <div class="q">3. Why did the neural bigram land at essentially the same loss as counting (2.4588 vs 2.4546)?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">Gradient descent got stuck in a local minimum</button>
+      <button class="qopt" type="button">PHP float precision limited the training</button>
+      <button class="qopt" type="button" data-right>Both extract everything one character of context contains — same information, same ceiling</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
   <div class="next"><span class="tag">When you're ready</span>
-  <p style="margin:8px 0 0">Drag the knobs, break the learning rate, read <code>Value.php</code>, then say <strong>"chapter 4 done"</strong>. Next: <em>Tensors</em> — the same math in matrix form (fast enough for 32,033 names), plus embeddings and softmax: the last ingredients before real language models.</p></div>
+  <p style="margin:8px 0 0">Drag the softmax sliders (make it confidently wrong and watch the gradient), skim <code>Tensor.php</code> next to <code>Value.php</code>, then say <strong>"chapter 5 done"</strong>. Next: the <em>MLP language model</em> — real embeddings, a real context window, and the first model that beats the bigram ceiling.</p></div>
 </section>
 </main>
 </div>
@@ -1096,6 +1179,52 @@ php bin/train-tiny-network.php</code></pre>
     gdDraw();
   });
   gdRefreshLr(); gdDraw();
+
+  // ---------- ch5: softmax + cross-entropy playground ----------
+  var smTokens = ['a', 'b', 'c', 'd', 'e'];
+  var smLogits = [2.0, 1.0, 0.0, -0.5, -1.5];
+  var smTruth = 0;
+  var smRows = document.getElementById('sm-rows'), smNote = document.getElementById('sm-note');
+  (function buildSoftmax() {
+    smTokens.forEach(function (token, i) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:24px 120px 1fr 120px;gap:12px;align-items:center;margin:7px 0;font-family:var(--mono);font-size:13px';
+      row.innerHTML = '<span id="sm-t-' + i + '" style="font-weight:700">' + token + '</span>' +
+        '<input type="range" min="-4" max="4" step="0.1" value="' + smLogits[i] + '" data-i="' + i + '" aria-label="logit for ' + token + '">' +
+        '<button class="cand" type="button" data-truth="' + i + '" style="grid-template-columns:1fr 64px" aria-label="mark ' + token + ' as the true next token">' +
+        '<span class="bar"><i id="sm-b-' + i + '"></i></span><span class="pct" id="sm-p-' + i + '"></span></button>' +
+        '<span id="sm-g-' + i + '" style="color:var(--amber);font-variant-numeric:tabular-nums"></span>';
+      smRows.appendChild(row);
+    });
+  })();
+  function smRender() {
+    var maxLogit = Math.max.apply(null, smLogits);
+    var exponentials = smLogits.map(function (v) { return Math.exp(v - maxLogit); });
+    var sum = exponentials.reduce(function (a, b) { return a + b; }, 0);
+    var probabilities = exponentials.map(function (e) { return e / sum; });
+    smTokens.forEach(function (token, i) {
+      document.getElementById('sm-b-' + i).style.width = (probabilities[i] * 100) + '%';
+      document.getElementById('sm-p-' + i).textContent = 'score ' + smLogits[i].toFixed(1) + ' → ' + (probabilities[i] * 100).toFixed(1) + '%';
+      var gradient = probabilities[i] - (i === smTruth ? 1 : 0);
+      document.getElementById('sm-g-' + i).textContent = 'grad ' + (gradient >= 0 ? '+' : '') + gradient.toFixed(3);
+      document.getElementById('sm-t-' + i).textContent = token + (i === smTruth ? ' ★' : '');
+    });
+    smNote.innerHTML = 'True next token: <strong>' + smTokens[smTruth] + '</strong> (★ — click a bar to change). ' +
+      'Its probability: <strong>' + (probabilities[smTruth] * 100).toFixed(1) + '%</strong> → loss = −ln(' +
+      probabilities[smTruth].toFixed(3) + ') = <strong>' + (-Math.log(probabilities[smTruth])).toFixed(3) + '</strong>. ' +
+      'Amber = the gradient each score receives: probability − 1 on the truth, probability elsewhere.';
+  }
+  smRows.addEventListener('input', function (event) {
+    if (event.target.dataset.i !== undefined) {
+      smLogits[event.target.dataset.i] = parseFloat(event.target.value);
+      smRender();
+    }
+  });
+  smRows.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-truth]');
+    if (btn) { smTruth = parseInt(btn.dataset.truth, 10); smRender(); }
+  });
+  smRender();
 
   // ---------- quiz ----------
   document.querySelectorAll('.quiz').forEach(function (q) {
