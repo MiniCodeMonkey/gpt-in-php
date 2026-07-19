@@ -1,0 +1,435 @@
+<title>GPT in PHP — The Textbook</title>
+<style>
+  :root {
+    --paper: #FAF9FC;
+    --card: #FFFFFF;
+    --ink: #23203A;
+    --muted: #6B677E;
+    --accent: #5B50C7;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #EDEBFA;
+    --amber: #C7743B;
+    --amber-soft: #F9EEE5;
+    --line: #E4E1EF;
+    --good: #2E7D5B;
+    --code-bg: #211E33;
+    --code-ink: #E8E6F3;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --serif: Charter, "Iowan Old Style", Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #17151F; --card: #201D2B; --ink: #ECEAF4; --muted: #9A96AD;
+      --accent: #948AF0; --accent-ink: #17151F; --accent-soft: #2A2743;
+      --amber: #E09A63; --amber-soft: #33281E; --line: #2C2939;
+      --good: #6BC49A; --code-bg: #100E17; --code-ink: #D8D5E8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #17151F; --card: #201D2B; --ink: #ECEAF4; --muted: #9A96AD;
+    --accent: #948AF0; --accent-ink: #17151F; --accent-soft: #2A2743;
+    --amber: #E09A63; --amber-soft: #33281E; --line: #2C2939;
+    --good: #6BC49A; --code-bg: #100E17; --code-ink: #D8D5E8;
+  }
+  :root[data-theme="light"] {
+    --paper: #FAF9FC; --card: #FFFFFF; --ink: #23203A; --muted: #6B677E;
+    --accent: #5B50C7; --accent-ink: #FFFFFF; --accent-soft: #EDEBFA;
+    --amber: #C7743B; --amber-soft: #F9EEE5; --line: #E4E1EF;
+    --good: #2E7D5B; --code-bg: #211E33; --code-ink: #E8E6F3;
+  }
+
+  html { background: var(--paper); }
+  body { margin: 0; color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.65; }
+  * { box-sizing: border-box; }
+
+  .shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 48px; max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+  @media (max-width: 860px) { .shell { display: block; } }
+
+  /* ---- chapter rail ---- */
+  nav.rail { position: sticky; top: 0; align-self: start; padding: 40px 0 24px; height: 100vh; overflow-y: auto; }
+  @media (max-width: 860px) { nav.rail { position: static; height: auto; padding: 24px 0 0; } }
+  .brand { font-family: var(--mono); font-size: 15px; font-weight: 700; letter-spacing: .04em; margin-bottom: 4px; }
+  .brand .php { color: var(--accent); }
+  .brand-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 24px; }
+  .rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  @media (max-width: 860px) { .rail ol { flex-direction: row; overflow-x: auto; padding-bottom: 8px; } }
+  .rail li a, .rail li span.locked {
+    display: flex; gap: 8px; align-items: baseline; padding: 5px 8px; border-radius: 4px;
+    font-family: var(--mono); font-size: 12.5px; text-decoration: none; color: var(--ink); white-space: nowrap;
+  }
+  .rail li span.locked { color: var(--muted); opacity: .55; }
+  .rail li a.here { background: var(--accent); color: var(--accent-ink); }
+  .rail li a:not(.here):hover, .rail li a:not(.here):focus-visible { background: var(--accent-soft); }
+  .rail .num { font-size: 10.5px; width: 1.6em; flex: none; opacity: .7; }
+
+  /* ---- main column ---- */
+  main { padding: 40px 0 96px; max-width: 680px; }
+  .eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px; }
+  h1 { font-family: var(--mono); font-size: clamp(28px, 5vw, 40px); line-height: 1.15; letter-spacing: -.01em; margin: 0 0 12px; text-wrap: balance; }
+  h2 { font-family: var(--mono); font-size: 20px; letter-spacing: -.005em; margin: 64px 0 16px; text-wrap: balance; }
+  h2 .sec { color: var(--accent); margin-right: 8px; }
+  h3 { font-family: var(--mono); font-size: 15px; margin: 32px 0 8px; }
+  p { margin: 0 0 16px; }
+  .lede { font-size: 19px; color: var(--muted); margin-bottom: 32px; }
+  strong { font-weight: 700; }
+  a { color: var(--accent); }
+  .aside { border-left: 3px solid var(--amber); background: var(--amber-soft); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 20px 0; font-size: 15.5px; }
+  .aside .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--amber); display: block; margin-bottom: 4px; }
+
+  code, pre { font-family: var(--mono); }
+  code { font-size: .86em; background: var(--accent-soft); padding: .1em .35em; border-radius: 4px; }
+  pre { background: var(--code-bg); color: var(--code-ink); font-size: 13px; line-height: 1.55; padding: 16px 18px; border-radius: 8px; overflow-x: auto; margin: 16px 0; }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  pre .c { color: #8A85A8; } pre .k { color: #A99FF2; } pre .s { color: #D9A87A; }
+
+  /* ---- hero demo ---- */
+  .demo { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin: 28px 0 8px; }
+  .demo-label { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .ctx { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 16px; min-height: 34px; }
+  .tok { font-family: var(--mono); font-size: 14px; background: var(--amber-soft); color: var(--ink); border: 1px solid var(--amber); border-radius: 5px; padding: 3px 8px; }
+  .tok.new { background: var(--accent-soft); border-color: var(--accent); }
+  .blank { font-family: var(--mono); font-size: 14px; color: var(--muted); border: 1px dashed var(--muted); border-radius: 5px; padding: 3px 10px; }
+  .cands { display: flex; flex-direction: column; gap: 6px; }
+  .cand { display: grid; grid-template-columns: 92px 1fr 52px; gap: 10px; align-items: center; width: 100%;
+    background: none; border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; cursor: pointer;
+    font-family: var(--mono); font-size: 13.5px; color: var(--ink); text-align: left; }
+  .cand:hover, .cand:focus-visible { border-color: var(--accent); background: var(--accent-soft); }
+  .cand .bar { height: 8px; border-radius: 4px; background: var(--accent-soft); position: relative; overflow: hidden; }
+  .cand .bar i { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 4px; }
+  .cand .pct { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .demo-foot { display: flex; gap: 10px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+  .btn { font-family: var(--mono); font-size: 12.5px; border-radius: 6px; padding: 7px 14px; cursor: pointer;
+    border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); }
+  .btn.ghost { background: none; color: var(--accent); }
+  .btn:focus-visible, .cand:focus-visible, .pl-stage:focus-visible, .qopt:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .demo-note { font-size: 13.5px; color: var(--muted); font-family: var(--serif); }
+
+  /* ---- pipeline ---- */
+  .pipeline { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 20px 0 14px; }
+  .pl-stage { font-family: var(--mono); font-size: 12.5px; border: 1px solid var(--line); background: var(--card);
+    border-radius: 6px; padding: 8px 11px; cursor: pointer; color: var(--ink); }
+  .pl-stage[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .pl-arrow { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+  .pl-detail { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; min-height: 120px; }
+  .pl-detail .ex { font-family: var(--mono); font-size: 13px; background: var(--accent-soft); border-radius: 6px; padding: 10px 12px; margin: 10px 0 6px; overflow-x: auto; white-space: nowrap; }
+  .pl-detail .ch { font-family: var(--mono); font-size: 11.5px; color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }
+  .pl-detail p { font-size: 15px; margin: 6px 0 0; }
+
+  /* ---- scale chart ---- */
+  .scale { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+  .srow { display: grid; grid-template-columns: 130px 1fr 90px; gap: 12px; align-items: center; font-family: var(--mono); font-size: 12.5px; }
+  .srow .bar { height: 14px; border-radius: 4px; background: var(--accent-soft); position: relative; }
+  .srow .bar i { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 4px; }
+  .srow.us .bar i { background: var(--amber); }
+  .srow .val { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .scale-cap { font-size: 13.5px; color: var(--muted); }
+
+  /* ---- course map ---- */
+  .map { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+  @media (max-width: 640px) { .map { grid-template-columns: 1fr; } }
+  .mcard { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 12px 14px; }
+  .mcard.here { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .mcard.dim { opacity: .55; }
+  .mcard .mnum { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .08em; }
+  .mcard .mtitle { font-family: var(--mono); font-size: 13.5px; font-weight: 700; margin: 2px 0 4px; }
+  .mcard .mwhat { font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+
+  /* ---- mission ---- */
+  .files { font-family: var(--mono); font-size: 13px; line-height: 1.7; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; margin: 16px 0; overflow-x: auto; }
+  .files .you { color: var(--amber); font-weight: 700; }
+  .files .dim { color: var(--muted); }
+  details.hint { border: 1px solid var(--line); border-radius: 8px; margin: 10px 0; background: var(--card); }
+  details.hint summary { font-family: var(--mono); font-size: 13px; padding: 10px 14px; cursor: pointer; color: var(--accent); }
+  details.hint > div { padding: 0 16px 12px; font-size: 15px; }
+  .check { border-left: 3px solid var(--good); padding: 2px 0 2px 14px; margin: 18px 0; }
+  .check .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--good); }
+
+  /* ---- quiz ---- */
+  .quiz { border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 18px 20px; margin: 18px 0; }
+  .quiz .q { font-weight: 700; margin-bottom: 10px; }
+  .qopts { display: flex; flex-direction: column; gap: 6px; }
+  .qopt { text-align: left; font-family: var(--serif); font-size: 15px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: none; color: var(--ink); cursor: pointer; }
+  .qopt:hover { border-color: var(--accent); }
+  .qopt.right { border-color: var(--good); background: color-mix(in srgb, var(--good) 12%, transparent); }
+  .qopt.wrong { border-color: var(--amber); opacity: .75; }
+  .qwhy { font-size: 14.5px; color: var(--muted); margin-top: 10px; display: none; }
+  .qwhy.show { display: block; }
+
+  .next { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 18px 20px; margin-top: 48px; }
+  .next .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  hr { border: none; border-top: 1px solid var(--line); margin: 48px 0; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cand .bar i, .srow .bar i { transition: width .5s ease; }
+  }
+</style>
+
+<div class="shell">
+<nav class="rail" aria-label="Chapters">
+  <div class="brand">GPT, in <span class="php">PHP</span></div>
+  <div class="brand-sub">The Textbook</div>
+  <ol>
+    <li><a class="here" href="#ch1" aria-current="page"><span class="num">01</span>The map</a></li>
+    <li><span class="locked"><span class="num">02</span>Tokenization</span></li>
+    <li><span class="locked"><span class="num">03</span>The bigram model</span></li>
+    <li><span class="locked"><span class="num">04</span>Autograd</span></li>
+    <li><span class="locked"><span class="num">05</span>Tensors</span></li>
+    <li><span class="locked"><span class="num">06</span>MLP language model</span></li>
+    <li><span class="locked"><span class="num">07</span>Self-attention</span></li>
+    <li><span class="locked"><span class="num">08</span>The Transformer</span></li>
+    <li><span class="locked"><span class="num">09</span>Inference</span></li>
+    <li><span class="locked"><span class="num">10</span>The chatbot</span></li>
+    <li><span class="locked"><span class="num">11</span>To the frontier</span></li>
+  </ol>
+</nav>
+
+<main id="ch1">
+  <p class="eyebrow">Chapter 01 · The map</p>
+  <h1>A language model is a next-word guessing machine.</h1>
+  <p class="lede">That's the whole secret. Everything else — Claude, ChatGPT, the model you're about to build in PHP — is engineering to make that one guess very, very good.</p>
+
+  <div class="demo" id="hero-demo">
+    <div class="demo-label">Try it — you are now the language model</div>
+    <div class="ctx" id="ctx"></div>
+    <div class="cands" id="cands"></div>
+    <div class="demo-foot">
+      <button class="btn ghost" id="sample" type="button">🎲 Sample for me</button>
+      <button class="btn ghost" id="reset" type="button">↺ Reset</button>
+      <span class="demo-note" id="demo-msg">Pick the next word — or let chance pick, weighted by probability.</span>
+    </div>
+  </div>
+  <p class="demo-note" style="margin-top:8px">Those bars are a <em>probability distribution</em>: one score per candidate word, all summing to 100%. An LLM produces exactly this — nothing more — then a word is drawn, appended, and the machine guesses again. One word at a time, forever. That loop is called <strong>sampling</strong>, and you'll build all of it.</p>
+
+  <h2 id="big-idea"><span class="sec">§1.1</span> The one big idea</h2>
+  <p>When you talk to Claude, it feels like a mind. Under the hood there is a single mathematical function. It takes a sequence of words (really <em>tokens</em> — chapter 2) and returns one probability for every word it knows, answering: <strong>"what comes next?"</strong></p>
+  <p>The astonishing discovery of the last decade: if you make that function big enough and train it on enough text, being good at "what comes next" <em>requires</em> understanding grammar, facts, style, and reasoning. To predict the next word of <em>"The capital of Denmark is"</em>, you must know it's Copenhagen. To predict the next line of a program, you must model what the code does. Intelligence emerges as a side effect of compression: the best possible next-word guesser has no choice but to understand.</p>
+  <div class="aside"><span class="tag">Hold on to this</span>
+  The function never "decides to say" anything. It only scores candidates. Chat behavior, helpfulness, refusals — all of that is trained-in later (chapters 10–11), on top of the same guessing machine.</div>
+
+  <h2 id="pipeline"><span class="sec">§1.2</span> The pipeline you will build</h2>
+  <p>Every GPT-style model — yours included — is this assembly line. Click each stage; the panel shows what the data looks like at that point and which chapter builds it.</p>
+  <div class="pipeline" id="pipeline" role="group" aria-label="Pipeline stages"></div>
+  <div class="pl-detail" id="pl-detail"></div>
+
+  <h2 id="scale"><span class="sec">§1.3</span> A sense of scale</h2>
+  <p>A model's capacity lives in its <strong>parameters</strong> — the learned numbers inside it (you'll meet them as weights in chapter 4). The bars below are on a <em>logarithmic</em> scale: each step rightward is 10×.</p>
+  <div class="scale">
+    <div class="srow us"><span>Our PHP GPT</span><span class="bar"><i style="width:44%"></i></span><span class="val">~0.5 M</span></div>
+    <div class="srow"><span>GPT-2 (2019)</span><span class="bar"><i style="width:63%"></i></span><span class="val">124 M</span></div>
+    <div class="srow"><span>GPT-3 (2020)</span><span class="bar"><i style="width:87%"></i></span><span class="val">175 B</span></div>
+    <div class="srow"><span>Frontier (2026)</span><span class="bar"><i style="width:100%"></i></span><span class="val">~10¹²</span></div>
+  </div>
+  <p class="scale-cap">Same architecture up and down this chart. The difference between our model and a frontier model is almost entirely <em>scale</em> — parameters, data, and the compute to train them.</p>
+  <p>Which is why we build in PHP without guilt: the concepts are identical at 500 thousand parameters and 1 trillion. What scale buys is <em>coherence</em> — our model will learn spelling and local grammar; frontier models, trained with roughly a trillion times more compute, learn world knowledge and reasoning. In today's mission you'll measure exactly how many multiply-adds per second your Mac can do in PHP, and we'll carry that number all the way to chapter 11 to compute how long training Claude would take on it. (Spoiler: bring snacks.)</p>
+
+  <h2 id="map"><span class="sec">§1.4</span> The course</h2>
+  <div class="map">
+    <div class="mcard here"><div class="mnum">CH 01 — YOU ARE HERE</div><div class="mtitle">The map</div><div class="mwhat">The big idea, the pipeline, and a matmul benchmark: your Mac's PHP FLOP/s.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 02</div><div class="mtitle">Tokenization</div><div class="mwhat">Text → numbers. A character tokenizer, then mini-BPE like the real ones.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 03</div><div class="mtitle">The bigram model</div><div class="mwhat">A counting-based name generator. Your first generative model — no neural net.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 04</div><div class="mtitle">Autograd</div><div class="mwhat">Backpropagation from scratch: a Value class that computes its own gradients.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 05</div><div class="mtitle">Tensors</div><div class="mwhat">Matrix ops, softmax, cross-entropy. The bigram reborn as a trained network.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 06</div><div class="mtitle">MLP language model</div><div class="mwhat">Context windows, hidden layers, the training loop, overfitting.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 07</div><div class="mtitle">Self-attention</div><div class="mwhat">The heart of the transformer, with heatmaps rendered from your own model.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 08</div><div class="mtitle">The Transformer</div><div class="mwhat">Blocks, residuals, layer norm → a full GPT generating text.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 09</div><div class="mtitle">Inference</div><div class="mwhat">Temperature, top-k, KV-cache — why generation feels creative.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 10</div><div class="mtitle">The chatbot</div><div class="mwhat">Fine-tune on a toy world; talk to your model with php chat.php.</div></div>
+    <div class="mcard dim"><div class="mnum">CH 11</div><div class="mtitle">To the frontier</div><div class="mwhat">Scaling laws, RLHF, and what separates your GPT from Claude.</div></div>
+  </div>
+
+  <h2 id="mission"><span class="sec">§1.5</span> Your mission</h2>
+  <p>One task, two payoffs: write your first tensor operation, and measure your machine. <strong>Matrix multiplication</strong> is the workhorse of deep learning — by chapter 8, ~95% of your model's runtime will be spent inside the function you write today.</p>
+
+  <h3>The files</h3>
+  <div class="files">
+llm/<br>
+├── src/Mat.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="you">← you write matmul() here</span><br>
+├── bin/bench.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">benchmark harness (provided)</span><br>
+├── bin/phpj&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">runs php with the JIT compiler on (provided)</span><br>
+└── tests/check-ch1.php&nbsp;<span class="dim">verifies your matmul is correct (provided)</span>
+  </div>
+
+  <h3>The math (all of it)</h3>
+  <p>Multiplying an <em>n×k</em> matrix A by a <em>k×m</em> matrix B gives an <em>n×m</em> matrix C, where each cell is a row-times-column dot product:</p>
+  <pre><code>C[i][j] = A[i][0]·B[0][j] + A[i][1]·B[1][j] + … + A[i][k-1]·B[k-1][j]</code></pre>
+  <p>Concretely: <code>[[1,2],[3,4]] · [[5,6],[7,8]]</code> → cell (0,0) is <code>1·5 + 2·7 = 19</code>. Matrices in our project are plain PHP arrays of rows: <code>[[1.0, 2.0], [3.0, 4.0]]</code>.</p>
+
+  <details class="hint"><summary>Hint 1 — loop structure</summary><div>Three nested loops: over rows <code>i</code> of A, over columns <code>j</code> of B, and inside, over <code>k</code> accumulating the dot product into a sum before assigning <code>$c[$i][$j]</code>.</div></details>
+  <details class="hint"><summary>Hint 2 — near-pseudocode (last resort)</summary><div><pre><code>for i in 0..n-1:
+  for j in 0..m-1:
+    sum = 0.0
+    for k in 0..K-1: sum += a[i][k] * b[k][j]
+    c[i][j] = sum</code></pre></div></details>
+
+  <h3>Run it</h3>
+  <pre><code><span class="c"># 1. correctness — must print all ✓ before benchmarking</span>
+php tests/check-ch1.php
+
+<span class="c"># 2. benchmark, plain PHP interpreter</span>
+php bin/bench.php
+
+<span class="c"># 3. benchmark again with the JIT compiler</span>
+./bin/phpj bin/bench.php</code></pre>
+
+  <div class="check"><span class="tag">Done when</span><br>
+  The check script passes, and you can report both MFLOP/s numbers back to Claude. Expect very roughly tens of MFLOP/s plain and a healthy multiple of that with JIT — we'll interpret the numbers together.</div>
+
+  <div class="aside"><span class="tag">Why JIT matters here</span>
+  Plain PHP re-interprets every <code>+=</code> and array access, billions of times. The JIT compiles your hot loops to native machine code. It's the difference between a model that trains over lunch and one that trains overnight — for free.</div>
+
+  <h2 id="quiz"><span class="sec">§1.6</span> Checkpoint quiz</h2>
+
+  <div class="quiz" data-why="Exactly — one probability for every token in its vocabulary. Choosing a word from that distribution is a separate step (sampling), which you played with in the demo.">
+    <div class="q">1. What does a language model actually compute in one forward pass?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">The best full sentence to reply with</button>
+      <button class="qopt" type="button" data-right>A probability for every token it knows, for the single next position</button>
+      <button class="qopt" type="button">The one correct next word</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Right — architecture is nearly identical up the chart. Coherence is bought with scale: parameters, data, and compute. That's why ours will babble charmingly and Claude doesn't.">
+    <div class="q">2. Our PHP GPT and a frontier model share almost the same architecture. What mainly separates their abilities?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">Frontier models use secret algorithms PHP can't express</button>
+      <button class="qopt" type="button">Python is fundamentally smarter than PHP</button>
+      <button class="qopt" type="button" data-right>Scale — roughly a trillion times more training compute, plus far more parameters and data</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Yes. Nobody programs the knowledge in. Being an excellent next-token guesser on huge amounts of text forces the model to internalize facts, grammar, and reasoning — understanding as a side effect of prediction.">
+    <div class="q">3. Where does a model's "knowledge" of facts like capital cities come from?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">A built-in database the model queries</button>
+      <button class="qopt" type="button" data-right>It's forced to learn facts because they're needed to predict next words well</button>
+      <button class="qopt" type="button">Engineers hand-write rules for common facts</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="next"><span class="tag">When you're done</span>
+  <p style="margin:8px 0 0">Implement <code>matmul()</code>, get the checks green, run both benchmarks, then tell Claude: <strong>"chapter 1 done — here are my numbers."</strong> Next up: <em>Tokenization</em>, where text becomes numbers.</p></div>
+</main>
+</div>
+
+<script>
+(function () {
+  // ---------- hero demo ----------
+  var l2generic = [["then",0.34],["and",0.27],["while",0.16],["because",0.13],["quietly",0.10]];
+  var TREE = {
+    prompt: ["The","cat","sat","on","the"],
+    dist: [
+      ["mat",0.42,[[".",0.48],[",",0.19],["and",0.14],["all",0.11],["purring",0.08]]],
+      ["sofa",0.18,[[".",0.41],["and",0.22],[",",0.18],["arm",0.11],["cushions",0.08]]],
+      ["floor",0.13,[[".",0.44],["and",0.24],[",",0.17],["next",0.09],["tiles",0.06]]],
+      ["windowsill",0.09,[[".",0.39],["and",0.26],["watching",0.20],[",",0.09],["ledge",0.06]]],
+      ["roof",0.06,[[".",0.42],["of",0.25],["and",0.18],[",",0.09],["tiles",0.06]]],
+      ["keyboard",0.05,[[".",0.31],["and",0.24],["during",0.19],["while",0.15],["again",0.11]]]
+    ]
+  };
+  var ctxEl = document.getElementById('ctx'), candsEl = document.getElementById('cands'),
+      msgEl = document.getElementById('demo-msg');
+  var state;
+
+  function render() {
+    ctxEl.innerHTML = '';
+    TREE.prompt.forEach(function (w) { addTok(w, false); });
+    state.picked.forEach(function (w) { addTok(w, true); });
+    if (state.level < 2) {
+      var blank = document.createElement('span'); blank.className = 'blank'; blank.textContent = '____';
+      ctxEl.appendChild(blank);
+    }
+    candsEl.innerHTML = '';
+    if (state.level === 2) {
+      msgEl.textContent = '…and so on, one token at a time, until a stop token. That is all text generation is.';
+      return;
+    }
+    var dist = state.level === 0 ? TREE.dist.map(function (d) { return [d[0], d[1]]; }) : state.nextDist;
+    dist.forEach(function (d, idx) {
+      var b = document.createElement('button');
+      b.className = 'cand'; b.type = 'button';
+      b.innerHTML = '<span>' + d[0] + '</span><span class="bar"><i style="width:0%"></i></span><span class="pct">' +
+        Math.round(d[1] * 100) + '%</span>';
+      b.addEventListener('click', function () { pick(idx); });
+      candsEl.appendChild(b);
+      requestAnimationFrame(function () { b.querySelector('i').style.width = (d[1] * 100) + '%'; });
+    });
+    msgEl.textContent = state.level === 0
+      ? 'Pick the next word — or let chance pick, weighted by probability.'
+      : 'The context grew, so the machine guesses again. Pick once more.';
+  }
+  function addTok(w, isNew) {
+    var t = document.createElement('span'); t.className = 'tok' + (isNew ? ' new' : ''); t.textContent = w;
+    ctxEl.appendChild(t);
+  }
+  function pick(idx) {
+    if (state.level === 0) {
+      var d = TREE.dist[idx];
+      state.picked.push(d[0]); state.nextDist = d[2]; state.level = 1;
+    } else if (state.level === 1) {
+      state.picked.push(state.nextDist[idx][0]); state.level = 2;
+    }
+    render();
+  }
+  function weightedPick(dist) {
+    var r = Math.random(), acc = 0;
+    for (var i = 0; i < dist.length; i++) { acc += dist[i][1]; if (r <= acc) return i; }
+    return dist.length - 1;
+  }
+  document.getElementById('sample').addEventListener('click', function () {
+    if (state.level === 2) return;
+    pick(weightedPick(state.level === 0 ? TREE.dist : state.nextDist));
+  });
+  document.getElementById('reset').addEventListener('click', function () {
+    state = { picked: [], nextDist: null, level: 0 }; render();
+  });
+  state = { picked: [], nextDist: null, level: 0 }; render();
+
+  // ---------- pipeline ----------
+  var STAGES = [
+    ["Text", "Raw characters, exactly as typed.", "\"Hej!\"", "You have this already"],
+    ["Tokens", "Text is chopped into pieces from a fixed vocabulary. We start with single characters; real models use chunks like \"He\" or \" world\".", "[\"H\", \"e\", \"j\", \"!\"]", "Chapter 2"],
+    ["Token IDs", "Each token gets an integer index into the vocabulary. From here on, the model only ever sees numbers.", "[19, 4, 9, 62]", "Chapter 2"],
+    ["Embeddings", "Each ID looks up a learned vector — a list of floats that encodes the token's meaning. Similar tokens end up with similar vectors.", "19 → [0.12, -0.44, 0.83, …]", "Chapter 5"],
+    ["Transformer ×N", "The thinking happens here: attention lets every position look at every earlier position, stacked in repeating blocks. ~95% of all parameters and compute.", "vectors in → smarter vectors out", "Chapters 6–8"],
+    ["Probabilities", "The final vector is projected to one score per vocabulary token and squashed by softmax into a distribution — the bars from the demo above.", "{\"a\": 3%, \"b\": 41%, …}", "Chapter 5"],
+    ["Sample ↩", "One token is drawn from the distribution, appended to the input, and the whole pipeline runs again. Loop until done.", "…b → run it all again", "Chapter 9"]
+  ];
+  var plEl = document.getElementById('pipeline'), plDetail = document.getElementById('pl-detail');
+  STAGES.forEach(function (s, i) {
+    var b = document.createElement('button');
+    b.className = 'pl-stage'; b.type = 'button'; b.textContent = s[0];
+    b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+    b.addEventListener('click', function () { selectStage(i); });
+    plEl.appendChild(b);
+    if (i < STAGES.length - 1) {
+      var a = document.createElement('span'); a.className = 'pl-arrow'; a.textContent = '→'; plEl.appendChild(a);
+    }
+  });
+  function selectStage(i) {
+    plEl.querySelectorAll('.pl-stage').forEach(function (el, j) {
+      el.setAttribute('aria-pressed', j === i ? 'true' : 'false');
+    });
+    var s = STAGES[i];
+    plDetail.innerHTML = '<span class="ch">' + s[3] + '</span><p>' + s[1] + '</p><div class="ex">' + s[2].replace(/</g, '&lt;') + '</div>';
+  }
+  selectStage(0);
+
+  // ---------- quiz ----------
+  document.querySelectorAll('.quiz').forEach(function (q) {
+    var why = q.querySelector('.qwhy');
+    q.querySelectorAll('.qopt').forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        q.querySelectorAll('.qopt').forEach(function (o) {
+          o.classList.add(o.hasAttribute('data-right') ? 'right' : 'wrong');
+          o.disabled = true;
+        });
+        why.textContent = (opt.hasAttribute('data-right') ? '✓ ' : 'Not quite — ') + q.getAttribute('data-why');
+        why.classList.add('show');
+      });
+    });
+  });
+})();
+</script>
