@@ -234,6 +234,133 @@ final class Tensor
         return $result;
     }
 
+    /** Differentiable transpose — needed for attention's queries · keysᵀ. */
+    public function transposed(): self
+    {
+        $result = new self(self::transpose($this->data));
+        $result->parents = [$this];
+        $result->backwardFunction = function () use ($result): void {
+            self::addInto($this->gradient, self::transpose($result->gradient));
+        };
+
+        return $result;
+    }
+
+    /** Multiply every entry by one constant (e.g. attention's 1/√headSize). */
+    public function multiplyByScalar(float $scalar): self
+    {
+        $data = [];
+        foreach ($this->data as $rowIndex => $row) {
+            foreach ($row as $columnIndex => $value) {
+                $data[$rowIndex][$columnIndex] = $value * $scalar;
+            }
+        }
+        $result = new self($data);
+        $result->parents = [$this];
+        $result->backwardFunction = function () use ($scalar, $result): void {
+            foreach ($result->gradient as $rowIndex => $row) {
+                foreach ($row as $columnIndex => $value) {
+                    $this->gradient[$rowIndex][$columnIndex] += $value * $scalar;
+                }
+            }
+        };
+
+        return $result;
+    }
+
+    /** Element-wise addition of two same-shaped tensors (residual connections, position embeddings). */
+    public function addElementwise(self $other): self
+    {
+        $data = [];
+        foreach ($this->data as $rowIndex => $row) {
+            foreach ($row as $columnIndex => $value) {
+                $data[$rowIndex][$columnIndex] = $value + $other->data[$rowIndex][$columnIndex];
+            }
+        }
+        $result = new self($data);
+        $result->parents = [$this, $other];
+        $result->backwardFunction = function () use ($other, $result): void {
+            self::addInto($this->gradient, $result->gradient);
+            self::addInto($other->gradient, $result->gradient);
+        };
+
+        return $result;
+    }
+
+    /**
+     * The causality gate. In a T×T score matrix where row t holds position t's
+     * interest in every position, entries above the diagonal are interest in
+     * the FUTURE — position 2 peeking at position 5. Generation happens left
+     * to right, so the future must be invisible during training too (or the
+     * model learns to cheat and falls apart the moment it has to generate).
+     *
+     * Setting those scores to -1e9 makes the upcoming softmax give them
+     * probability ~zero. Backward: blocked cells pass no gradient.
+     */
+    public function maskFuturePositions(): self
+    {
+        $data = [];
+        foreach ($this->data as $rowIndex => $row) {
+            foreach ($row as $columnIndex => $value) {
+                $data[$rowIndex][$columnIndex] = $columnIndex > $rowIndex ? -1e9 : $value;
+            }
+        }
+        $result = new self($data);
+        $result->parents = [$this];
+        $result->backwardFunction = function () use ($result): void {
+            foreach ($result->gradient as $rowIndex => $row) {
+                foreach ($row as $columnIndex => $value) {
+                    if ($columnIndex <= $rowIndex) {
+                        $this->gradient[$rowIndex][$columnIndex] += $value;
+                    }
+                }
+            }
+        };
+
+        return $result;
+    }
+
+    /**
+     * Softmax applied to every row independently — turns each row of attention
+     * scores into a probability distribution ("how much of my attention does
+     * each position get"). Same math as softmaxCrossEntropy's first half, but
+     * differentiable on its own because here the output feeds further layers.
+     */
+    public function softmaxRows(): self
+    {
+        $data = [];
+        foreach ($this->data as $rowIndex => $logits) {
+            $highest = max($logits);
+            $exponentials = [];
+            $sum = 0.0;
+            foreach ($logits as $columnIndex => $logit) {
+                $e = exp($logit - $highest);
+                $exponentials[$columnIndex] = $e;
+                $sum += $e;
+            }
+            foreach ($exponentials as $columnIndex => $e) {
+                $data[$rowIndex][$columnIndex] = $e / $sum;
+            }
+        }
+        $result = new self($data);
+        $result->parents = [$this];
+        $result->backwardFunction = function () use ($result): void {
+            // For each row: dscore_j = p_j × (upstream_j − Σ_k p_k × upstream_k)
+            foreach ($result->gradient as $rowIndex => $upstreamRow) {
+                $weightedSum = 0.0;
+                foreach ($upstreamRow as $columnIndex => $upstream) {
+                    $weightedSum += $result->data[$rowIndex][$columnIndex] * $upstream;
+                }
+                foreach ($upstreamRow as $columnIndex => $upstream) {
+                    $this->gradient[$rowIndex][$columnIndex] +=
+                        $result->data[$rowIndex][$columnIndex] * ($upstream - $weightedSum);
+                }
+            }
+        };
+
+        return $result;
+    }
+
     /**
      * The final step of every language model, fused into one operation:
      * softmax (scores → probabilities) + cross-entropy (chapter 3's loss).

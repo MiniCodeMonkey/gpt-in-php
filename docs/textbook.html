@@ -207,8 +207,8 @@
     <li><a href="#ch3"><span class="num">03</span>The bigram model ✓</a></li>
     <li><a href="#ch4"><span class="num">04</span>Autograd ✓</a></li>
     <li><a href="#ch5"><span class="num">05</span>Tensors ✓</a></li>
-    <li><a class="here" href="#ch6" aria-current="page"><span class="num">06</span>MLP language model</a></li>
-    <li><span class="locked"><span class="num">07</span>Self-attention</span></li>
+    <li><a href="#ch6"><span class="num">06</span>MLP language model ✓</a></li>
+    <li><a class="here" href="#ch7" aria-current="page"><span class="num">07</span>Self-attention</a></li>
     <li><span class="locked"><span class="num">08</span>The Transformer</span></li>
     <li><span class="locked"><span class="num">09</span>Inference</span></li>
     <li><span class="locked"><span class="num">10</span>The chatbot</span></li>
@@ -262,8 +262,8 @@
     <div class="mcard"><div class="mnum">CH 03 — DONE ✓</div><div class="mtitle">The bigram model</div><div class="mwhat">A counting-based name generator. Your first generative model — no neural net.</div></div>
     <div class="mcard"><div class="mnum">CH 04 — DONE ✓</div><div class="mtitle">Autograd</div><div class="mwhat">Backpropagation from scratch: a Value class that computes its own gradients.</div></div>
     <div class="mcard"><div class="mnum">CH 05 — DONE ✓</div><div class="mtitle">Tensors</div><div class="mwhat">Matrix ops, softmax, cross-entropy. The bigram reborn as a trained network.</div></div>
-    <div class="mcard here"><div class="mnum">CH 06 — YOU ARE HERE</div><div class="mtitle">MLP language model</div><div class="mwhat">Context windows, hidden layers, the training loop, overfitting.</div></div>
-    <div class="mcard dim"><div class="mnum">CH 07</div><div class="mtitle">Self-attention</div><div class="mwhat">The heart of the transformer, with heatmaps rendered from your own model.</div></div>
+    <div class="mcard"><div class="mnum">CH 06 — DONE ✓</div><div class="mtitle">MLP language model</div><div class="mwhat">Context windows, hidden layers, the training loop, overfitting.</div></div>
+    <div class="mcard here"><div class="mnum">CH 07 — YOU ARE HERE</div><div class="mtitle">Self-attention</div><div class="mwhat">The heart of the transformer, with heatmaps rendered from your own model.</div></div>
     <div class="mcard dim"><div class="mnum">CH 08</div><div class="mtitle">The Transformer</div><div class="mwhat">Blocks, residuals, layer norm → a full GPT generating text.</div></div>
     <div class="mcard dim"><div class="mnum">CH 09</div><div class="mtitle">Inference</div><div class="mwhat">Temperature, top-k, KV-cache — why generation feels creative.</div></div>
     <div class="mcard dim"><div class="mnum">CH 10</div><div class="mtitle">The chatbot</div><div class="mwhat">Fine-tune on a toy world; talk to your model with php chat.php.</div></div>
@@ -810,8 +810,91 @@ llm/<br>
     <div class="qwhy"></div>
   </div>
 
+  <div class="next"><span class="tag">Chapter 6 complete ✓</span>
+  <p style="margin:8px 0 0">Embeddings generalize; windows still constrain. <a href="#ch7">Continue to Chapter 7: Self-attention →</a></p></div>
+</section>
+
+<section id="ch7">
+  <hr>
+  <p class="eyebrow">Chapter 07 · Self-attention</p>
+  <h1>Every position asks the past for help.</h1>
+  <p class="lede">The MLP reads exactly 3 characters through a rigid window. Self-attention — the 2017 idea from "Attention Is All You Need" — lets every position look at <em>every</em> earlier position and decide, from content, what matters. It is the T in GPT, and you now have one running in PHP.</p>
+
+  <h2 id="rigid"><span class="sec">§7.1</span> What's wrong with windows</h2>
+  <p>Three problems, all structural. A fixed window <strong>forgets</strong>: position 9 literally cannot see position 1, so the MLP never knows how the name began. It's <strong>rigid</strong>: the third-character-back always lands in the same input slots, even though <em>which</em> earlier character matters depends entirely on content. And it <strong>scales badly</strong>: widening the window multiplies the input layer.</p>
+  <p>What we actually want sounds almost too soft to be math: let each position <em>ask the past for what it needs</em>. Attention makes that differentiable.</p>
+
+  <h2 id="qkv"><span class="sec">§7.2</span> Queries, keys, values: a soft lookup</h2>
+  <p>Each position's vector gets three learned projections — three <em>roles</em>:</p>
+  <p><strong>query</strong> — "what am I looking for?" · <strong>key</strong> — "what do I advertise?" · <strong>value</strong> — "what will I hand over if you pick me?"</p>
+  <p>Then, in one sweep: every query is dotted against every key, giving a T×T grid of match scores (high score = "you have what I want"). Scores are scaled by 1/√headSize (long vectors make naturally bigger dot products; unscaled, softmax saturates and gradients die), the future is masked off, and each row is softmaxed into a probability distribution: <em>how position t divides its attention over the visible past</em>. The output for each position is the attention-weighted blend of the values it chose. Every arrow in that story is differentiable — so gradient descent <strong>learns what to look for</strong>. Nobody programs the patterns.</p>
+  <p>These are the actual patterns our trained head learned — not illustrations:</p>
+
+  <div class="demo">
+    <div class="demo-label">Real attention weights from bin/train-attention.php — row = the position looking, column = where it looks</div>
+    <div class="demo-foot" style="margin:0 0 12px" id="at-picker"></div>
+    <div id="at-grid" style="display:grid;gap:1px"></div>
+    <p class="demo-note" id="at-note" style="margin:10px 0 0">Hover a cell. Notice the hard black upper triangle — the causal mask, the future literally zeroed out — and how different characters spread attention differently: some lean on the previous character, some reach back to the start of the name.</p>
+  </div>
+
+  <h2 id="causal"><span class="sec">§7.3</span> The mask, and a free lunch</h2>
+  <p>Row t may only attend to columns ≤ t: scores above the diagonal are set to −10⁹ before the softmax, which rounds their attention to zero. Why so strict? Because generation runs left to right — at inference time the future <em>doesn't exist yet</em> — and a model allowed to peek during training learns to rely on information it will never have again.</p>
+  <p>The discipline pays for itself spectacularly: with the mask in place, one forward pass over <code>[·, e, m, m, a]</code> yields <strong>T honest predictions at once</strong> — position 0 predicts <em>e</em>, position 1 predicts <em>m</em>, and so on — each provably uninfluenced by its own answer key. One sequence = T training examples for one pass. This parallelism (not raw cleverness) is the main reason transformers dethroned their predecessors: they saturate GPUs. Our check suite proves the causality end to end: change token 4, and positions 1–3's predictions stay identical to 12 decimal places.</p>
+
+  <h2 id="pos"><span class="sec">§7.4</span> Position embeddings: telling attention where things are</h2>
+  <p>One subtlety: the attention mechanism compares <em>contents</em> only — shuffle the input vectors and the same matches happen. It is order-blind. The MLP got order for free (slot 1 vs slot 2); attention needs it injected. The fix is almost cheeky: learn a vector for each <em>position</em> 0…11, and add it to the token's embedding. Now "m at position 1" ≠ "m at position 4", and attention can learn things like "look at the first position" — which real heads in real transformers demonstrably do.</p>
+
+  <h2 id="ch7-results"><span class="sec">§7.5</span> The experiment, honestly framed</h2>
+  <p>One head, 16 dimensions, <strong>1,851 parameters</strong> — trained on names in 18 seconds: validation loss <strong>2.3267</strong>. Between the bigram (2.4546) and the MLP (2.1932), from a quarter of the MLP's parameters. That's the engine alone, no chassis: no feed-forward layer to think about what was gathered, no stacking, no residuals. Assembling those is chapter 8, and the ladder falls again.</p>
+  <p>The check that matters more than the loss: we trained the head on sequences where the correct answer is <em>"repeat the FIRST token, 5 positions back"</em> — information a 3-character window cannot access, ever. Attention learns it to 100% confidence. That capability — <em>content-addressed recall at arbitrary distance</em> — is the thing the whole chapter buys, and at frontier scale it's why Claude can use a fact from the top of your prompt at the bottom of its answer.</p>
+
+  <h2 id="ch7-build"><span class="sec">§7.6</span> The build</h2>
+  <div class="files">
+llm/<br>
+├── src/SelfAttentionHead.php&nbsp;&nbsp;&nbsp;<span class="you">← the crown jewel; forward() is 12 lines</span><br>
+├── src/AttentionLanguageModel.php&nbsp;<span class="you">← embeddings + positions + head + logits</span><br>
+├── src/Tensor.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="you">← + transposed, multiplyByScalar, maskFuturePositions, softmaxRows</span><br>
+├── bin/train-attention.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">train + export the heatmaps above (18s)</span><br>
+└── tests/check-ch7.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">8 checks: causality, mask, distant recall</span>
+  </div>
+  <pre><code>php tests/check-ch7.php
+./bin/phpj bin/train-attention.php</code></pre>
+  <p>Read <code>SelfAttentionHead::forward()</code> slowly — it is the most important 12 lines of the course: two matmuls to get scores, scale, mask, softmax, one matmul to blend values. Everything else in a frontier model is scaffolding around this.</p>
+
+  <h2 id="ch7-quiz"><span class="sec">§7.7</span> Checkpoint quiz</h2>
+
+  <div class="quiz" data-why="Right — query is what a position is looking for, key is what a position advertises, and their dot product measures the match. The value is what actually flows onward, weighted by that match. Three roles, three learned matrices, one soft lookup.">
+    <div class="q">1. In attention, a high dot product between position 7's query and position 2's key means:</div>
+    <div class="qopts">
+      <button class="qopt" type="button">Positions 7 and 2 hold the same character</button>
+      <button class="qopt" type="button" data-right>Position 2 advertises what position 7 is looking for — so 7 will absorb a big share of 2's value</button>
+      <button class="qopt" type="button">Position 2 is exactly 5 steps back, which the model prefers</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Exactly — at generation time the future doesn't exist. A model that trained while peeking learns to depend on information that vanishes at inference, and its predictions collapse. The mask keeps training conditions identical to generation conditions — and as a bonus makes every position an honest training example in parallel.">
+    <div class="q">2. Why must the future be masked during training, not just during generation?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">To save computation on the unused half of the matrix</button>
+      <button class="qopt" type="button" data-right>A model that trains with future access learns to rely on it — and the future never exists when generating</button>
+      <button class="qopt" type="button">Because softmax can't handle full rows</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Yes — attention compares contents only; shuffle the inputs and the dot products don't change. Without position information the model couldn't distinguish 'ab' from 'ba'. Learned position vectors, added to token vectors, restore order — and give attention the vocabulary to say 'attend to the first position'.">
+    <div class="q">3. Why do we suddenly need position embeddings when the MLP never did?</div>
+    <div class="qopts">
+      <button class="qopt" type="button" data-right>Attention is order-blind — it matches content, so position must be injected into the vectors themselves</button>
+      <button class="qopt" type="button">Longer sequences overflow without them</button>
+      <button class="qopt" type="button">They speed up convergence but are optional</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
   <div class="next"><span class="tag">When you're ready</span>
-  <p style="margin:8px 0 0">Study the embedding map, find the learning-rate cliff in the loss curve, read <code>computeLogits()</code>, then say <strong>"chapter 6 done"</strong>. Next: <em>self-attention</em> — the 2017 idea that replaced fixed windows with "every position looks at every earlier position", made GPT possible, and gives this course its transformer.</p></div>
+  <p style="margin:8px 0 0">Explore the four heatmaps, read <code>forward()</code>, then say <strong>"chapter 7 done"</strong>. Next: <em>the Transformer</em> — residual streams, layer norm, feed-forward layers, stacked blocks. We assemble the GPT and take the ladder's last rung.</p></div>
 </section>
 </main>
 </div>
@@ -1369,6 +1452,56 @@ llm/<br>
     drawLine('validation', cssVar('--accent'), 4);
     context.fillStyle = cssVar('--accent'); context.fillText('validation', w - pad - 130, toY(MLP.curve[MLP.curve.length - 1].validation) - 12);
   })();
+
+  // ---------- ch7: real attention heatmaps ----------
+  var ATTENTION = [{"name":"mathias","labels":["\u00b7","m","a","t","h","i","a","s"],"weights":[[1,0,0,0,0,0,0,0],[0.4636,0.5364,0,0,0,0,0,0],[0.5183,0.0057,0.4759,0,0,0,0,0],[0.3047,0.0743,0.2455,0.3754,0,0,0,0],[0.1138,0.0479,0.1063,0.3244,0.4075,0,0,0],[0.3151,0.0103,0.0892,0.0726,0.0601,0.4526,0,0],[0.0311,0.0004,0.0243,0.0032,0.0022,0.0361,0.9026,0],[0.0175,0.0251,0.0341,0.0243,0.0325,0.0787,0.4214,0.3663]]},{"name":"isabella","labels":["\u00b7","i","s","a","b","e","l","l","a"],"weights":[[1,0,0,0,0,0,0,0,0],[0.9247,0.0753,0,0,0,0,0,0,0],[0.3805,0.1972,0.4224,0,0,0,0,0,0],[0.2917,0.0064,0.1141,0.5878,0,0,0,0,0],[0.0974,0.1815,0.1361,0.1989,0.3861,0,0,0,0],[0.2784,0.0677,0.072,0.0817,0.0571,0.4431,0,0,0],[0.0374,0.0289,0.0217,0.0186,0.0462,0.448,0.3992,0,0],[0.0196,0.0345,0.0234,0.0242,0.0618,0.2355,0.2689,0.3321,0],[0.0121,0.0013,0.0085,0.0138,0.0033,0.025,0.0628,0.086,0.7871]]},{"name":"alexander","labels":["\u00b7","a","l","e","x","a","n","d","e","r"],"weights":[[1,0,0,0,0,0,0,0,0,0],[0.8861,0.1139,0,0,0,0,0,0,0,0],[0.3576,0.1277,0.5147,0,0,0,0,0,0,0],[0.4396,0.0456,0.1764,0.3384,0,0,0,0,0,0],[0.1233,0.0859,0.0663,0.1634,0.5611,0,0,0,0,0],[0.1091,0.0192,0.0155,0.0283,0.0881,0.7397,0,0,0,0],[0.036,0.0044,0.0048,0.0164,0.0296,0.1804,0.7284,0,0,0],[0.0121,0.0622,0.0084,0.0118,0.0516,0.1156,0.1345,0.6038,0,0],[0.0878,0.0389,0.0458,0.0386,0.0761,0.1237,0.0793,0.1578,0.352,0],[0.0143,0.0358,0.0097,0.0196,0.0434,0.1294,0.06,0.2738,0.3106,0.1032]]},{"name":"sofia","labels":["\u00b7","s","o","f","i","a"],"weights":[[1,0,0,0,0,0],[0.5779,0.4221,0,0,0,0],[0.5884,0.0029,0.4087,0,0,0],[0.2564,0.2388,0.1975,0.3073,0,0],[0.3412,0.016,0.147,0.0833,0.4126,0],[0.1103,0.0055,0.0514,0.0039,0.0807,0.7481]]}]; // injected from docs/attention-data.json
+  var atGrid = document.getElementById('at-grid'), atNote = document.getElementById('at-note'),
+      atPicker = document.getElementById('at-picker');
+  function renderAttention(index) {
+    var entry = ATTENTION[index];
+    var T = entry.labels.length;
+    atPicker.querySelectorAll('button').forEach(function (b, i) {
+      b.className = i === index ? 'btn' : 'btn ghost';
+    });
+    atGrid.style.gridTemplateColumns = '30px repeat(' + T + ', minmax(0, 44px))';
+    atGrid.innerHTML = '';
+    atGrid.appendChild(document.createElement('span'));
+    entry.labels.forEach(function (label) {
+      var lab = document.createElement('span'); lab.className = 'hm-lab'; lab.textContent = label; atGrid.appendChild(lab);
+    });
+    entry.weights.forEach(function (row, r) {
+      var lab = document.createElement('span'); lab.className = 'hm-lab'; lab.textContent = entry.labels[r]; atGrid.appendChild(lab);
+      row.forEach(function (weight, c) {
+        var cell = document.createElement('span'); cell.className = 'hm-cell';
+        if (c > r) {
+          cell.style.background = 'color-mix(in srgb, var(--ink) 85%, transparent)';
+        } else {
+          var intensity = Math.min(100, Math.round(Math.sqrt(weight) * 115));
+          if (intensity > 4) cell.style.background = 'color-mix(in srgb, var(--accent) ' + intensity + '%, var(--accent-soft))';
+        }
+        cell.dataset.r = r; cell.dataset.c = c; cell.dataset.n = index;
+        atGrid.appendChild(cell);
+      });
+    });
+  }
+  ATTENTION.forEach(function (entry, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = i === 0 ? 'btn' : 'btn ghost'; b.textContent = entry.name;
+    b.addEventListener('click', function () { renderAttention(i); });
+    atPicker.appendChild(b);
+  });
+  atGrid.addEventListener('mouseover', function (event) {
+    var cell = event.target;
+    if (cell.dataset.r === undefined) return;
+    var entry = ATTENTION[cell.dataset.n], r = +cell.dataset.r, c = +cell.dataset.c;
+    if (c > r) {
+      atNote.innerHTML = 'Position ' + r + ' (<strong>' + entry.labels[r] + '</strong>) → position ' + c + ' (<strong>' + entry.labels[c] + '</strong>): <strong>masked</strong> — that is the future.';
+    } else {
+      atNote.innerHTML = 'While predicting from position ' + r + ' (<strong>' + entry.labels[r] + '</strong>): ' +
+        (entry.weights[r][c] * 100).toFixed(1) + '% of its attention goes to position ' + c + ' (<strong>' + entry.labels[c] + '</strong>).';
+    }
+  });
+  renderAttention(0);
 
   // ---------- quiz ----------
   document.querySelectorAll('.quiz').forEach(function (q) {
