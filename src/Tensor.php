@@ -362,6 +362,106 @@ final class Tensor
     }
 
     /**
+     * Glue tensors side by side (same row count) — how multi-head attention
+     * reunites its heads: each contributes a slice of columns. Backward slices
+     * the gradient back apart at the same offsets.
+     *
+     * @param array<int, Tensor> $tensors
+     */
+    public static function concatenateColumns(array $tensors): self
+    {
+        $data = [];
+        foreach ($tensors[0]->data as $rowIndex => $unused) {
+            $flat = [];
+            foreach ($tensors as $tensor) {
+                foreach ($tensor->data[$rowIndex] as $value) {
+                    $flat[] = $value;
+                }
+            }
+            $data[$rowIndex] = $flat;
+        }
+        $result = new self($data);
+        $result->parents = $tensors;
+        $result->backwardFunction = function () use ($tensors, $result): void {
+            $offset = 0;
+            foreach ($tensors as $tensor) {
+                $width = $tensor->columnCount();
+                foreach ($tensor->gradient as $rowIndex => $row) {
+                    for ($column = 0; $column < $width; $column++) {
+                        $tensor->gradient[$rowIndex][$column] += $result->gradient[$rowIndex][$offset + $column];
+                    }
+                }
+                $offset += $width;
+            }
+        };
+
+        return $result;
+    }
+
+    /**
+     * Layer normalization — the stabilizer that makes DEEP networks trainable.
+     *
+     * Per row (per position): shift and scale the values to mean 0, variance 1,
+     * then apply a learned per-column $gain and $bias (both 1×n) so the network
+     * can undo the standardization wherever it helps. Deep stacks of layers
+     * drift toward exploding or vanishing activations; renormalizing at every
+     * block keeps every layer operating in its responsive range.
+     *
+     * The backward pass must account for each value's effect on its row's mean
+     * and variance too — the formula below is the chain rule worked through
+     * that dependency (and verified numerically in tests/check-ch8.php).
+     */
+    public function layerNormalizeRows(self $gain, self $bias): self
+    {
+        $epsilon = 1e-5;
+        $columnCount = $this->columnCount();
+        $data = [];
+        $normalized = [];
+        $inverseSpreads = [];
+        foreach ($this->data as $rowIndex => $row) {
+            $mean = array_sum($row) / $columnCount;
+            $variance = 0.0;
+            foreach ($row as $value) {
+                $variance += ($value - $mean) ** 2;
+            }
+            $variance /= $columnCount;
+            $inverseSpread = 1.0 / sqrt($variance + $epsilon);
+            $inverseSpreads[$rowIndex] = $inverseSpread;
+            foreach ($row as $columnIndex => $value) {
+                $standardized = ($value - $mean) * $inverseSpread;
+                $normalized[$rowIndex][$columnIndex] = $standardized;
+                $data[$rowIndex][$columnIndex] = $standardized * $gain->data[0][$columnIndex] + $bias->data[0][$columnIndex];
+            }
+        }
+        $result = new self($data);
+        $result->parents = [$this, $gain, $bias];
+        $result->backwardFunction = function () use ($gain, $bias, $normalized, $inverseSpreads, $columnCount, $result): void {
+            foreach ($result->gradient as $rowIndex => $upstreamRow) {
+                $scaledUpstream = [];
+                $meanScaled = 0.0;
+                $meanScaledTimesNormalized = 0.0;
+                foreach ($upstreamRow as $columnIndex => $upstream) {
+                    $scaled = $upstream * $gain->data[0][$columnIndex];
+                    $scaledUpstream[$columnIndex] = $scaled;
+                    $meanScaled += $scaled;
+                    $meanScaledTimesNormalized += $scaled * $normalized[$rowIndex][$columnIndex];
+
+                    $gain->gradient[0][$columnIndex] += $upstream * $normalized[$rowIndex][$columnIndex];
+                    $bias->gradient[0][$columnIndex] += $upstream;
+                }
+                $meanScaled /= $columnCount;
+                $meanScaledTimesNormalized /= $columnCount;
+                foreach ($scaledUpstream as $columnIndex => $scaled) {
+                    $this->gradient[$rowIndex][$columnIndex] += $inverseSpreads[$rowIndex]
+                        * ($scaled - $meanScaled - $normalized[$rowIndex][$columnIndex] * $meanScaledTimesNormalized);
+                }
+            }
+        };
+
+        return $result;
+    }
+
+    /**
      * The final step of every language model, fused into one operation:
      * softmax (scores → probabilities) + cross-entropy (chapter 3's loss).
      *

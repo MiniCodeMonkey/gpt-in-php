@@ -208,8 +208,8 @@
     <li><a href="#ch4"><span class="num">04</span>Autograd ✓</a></li>
     <li><a href="#ch5"><span class="num">05</span>Tensors ✓</a></li>
     <li><a href="#ch6"><span class="num">06</span>MLP language model ✓</a></li>
-    <li><a class="here" href="#ch7" aria-current="page"><span class="num">07</span>Self-attention</a></li>
-    <li><span class="locked"><span class="num">08</span>The Transformer</span></li>
+    <li><a href="#ch7"><span class="num">07</span>Self-attention ✓</a></li>
+    <li><a class="here" href="#ch8" aria-current="page"><span class="num">08</span>The Transformer</a></li>
     <li><span class="locked"><span class="num">09</span>Inference</span></li>
     <li><span class="locked"><span class="num">10</span>The chatbot</span></li>
     <li><span class="locked"><span class="num">11</span>To the frontier</span></li>
@@ -263,8 +263,8 @@
     <div class="mcard"><div class="mnum">CH 04 — DONE ✓</div><div class="mtitle">Autograd</div><div class="mwhat">Backpropagation from scratch: a Value class that computes its own gradients.</div></div>
     <div class="mcard"><div class="mnum">CH 05 — DONE ✓</div><div class="mtitle">Tensors</div><div class="mwhat">Matrix ops, softmax, cross-entropy. The bigram reborn as a trained network.</div></div>
     <div class="mcard"><div class="mnum">CH 06 — DONE ✓</div><div class="mtitle">MLP language model</div><div class="mwhat">Context windows, hidden layers, the training loop, overfitting.</div></div>
-    <div class="mcard here"><div class="mnum">CH 07 — YOU ARE HERE</div><div class="mtitle">Self-attention</div><div class="mwhat">The heart of the transformer, with heatmaps rendered from your own model.</div></div>
-    <div class="mcard dim"><div class="mnum">CH 08</div><div class="mtitle">The Transformer</div><div class="mwhat">Blocks, residuals, layer norm → a full GPT generating text.</div></div>
+    <div class="mcard"><div class="mnum">CH 07 — DONE ✓</div><div class="mtitle">Self-attention</div><div class="mwhat">The heart of the transformer, with heatmaps rendered from your own model.</div></div>
+    <div class="mcard here"><div class="mnum">CH 08 — YOU ARE HERE</div><div class="mtitle">The Transformer</div><div class="mwhat">Blocks, residuals, layer norm → a full GPT generating text.</div></div>
     <div class="mcard dim"><div class="mnum">CH 09</div><div class="mtitle">Inference</div><div class="mwhat">Temperature, top-k, KV-cache — why generation feels creative.</div></div>
     <div class="mcard dim"><div class="mnum">CH 10</div><div class="mtitle">The chatbot</div><div class="mwhat">Fine-tune on a toy world; talk to your model with php chat.php.</div></div>
     <div class="mcard dim"><div class="mnum">CH 11</div><div class="mtitle">To the frontier</div><div class="mwhat">Scaling laws, RLHF, and what separates your GPT from Claude.</div></div>
@@ -893,8 +893,108 @@ llm/<br>
     <div class="qwhy"></div>
   </div>
 
+  <div class="next"><span class="tag">Chapter 7 complete ✓</span>
+  <p style="margin:8px 0 0">The engine works. <a href="#ch8">Continue to Chapter 8: The Transformer →</a></p></div>
+</section>
+
+<section id="ch8">
+  <hr>
+  <p class="eyebrow">Chapter 08 · The Transformer</p>
+  <h1>Assembly of the GPT.</h1>
+  <p class="lede">Nothing new is invented in this chapter — that's the point. Attention, feed-forward nets, embeddings, softmax: you built them all. Today they get bolted together the way "Attention Is All You Need" prescribed in 2017, and the result is, architecturally, a real GPT.</p>
+
+  <h2 id="missing"><span class="sec">§8.1</span> Four missing pieces</h2>
+  <p><strong>Feed-forward layers.</strong> Attention <em>gathers</em> — it moves information between positions — but it barely <em>processes</em>. So each block follows attention with a small per-position neural network (widened 4× in the middle: room to think): every position privately digests what it just collected. The division of labor is clean: attention = communication, feed-forward = computation.</p>
+  <p><strong>Multi-head attention.</strong> One head learns one kind of lookup. Running several small heads in parallel — each with its own queries, keys, values over a slice of the dimensions — lets one block track several relationships at once (the previous character, the start of the name, the vowel pattern…). Their outputs are concatenated and mixed by a projection.</p>
+  <p><strong>Residual connections.</strong> The deep-learning survival trick. Each sub-layer's output is <em>added</em> to its input, never replacing it: <code>stream = stream + attention(stream)</code>. Picture one <strong>residual stream</strong> flowing up through the network — a shared whiteboard every block reads from and writes additive edits onto. And remember chapter 4's add rule: addition passes gradients through <em>untouched</em> — so the loss signal at the top flows down the stream to the earliest layers unimpeded. Before this trick (2015), deep networks simply didn't train.</p>
+  <p><strong>Layer normalization.</strong> Stacked layers drift — activations explode or collapse, and tanh/softmax saturate. Before every sub-layer, each position's vector is re-standardized (mean 0, spread 1, with learned per-dimension gain and bias to undo it where useful). It's the thermostat that keeps 2 blocks — or 96 — in their responsive range. Its backward pass is the trickiest derivative in our codebase, because each value affects its row's mean and variance too; the check suite verifies it numerically, as always.</p>
+
+  <h2 id="block"><span class="sec">§8.2</span> The block, and the whole machine</h2>
+  <p>Click through the assembled architecture — this is literally <code>computeLogits()</code>:</p>
+  <div class="pipeline" id="gpt-arch" role="group" aria-label="GPT architecture stages"></div>
+  <div class="pl-detail" id="gpt-arch-detail"></div>
+  <p style="margin-top:16px">Stack depth is the multiplier: block 1's attention gathers pairwise patterns; block 2's attention then attends over <em>those</em> — patterns of patterns. GPT-2 does this 12 times, GPT-3 does it 96 times. Ours does it twice, and that's enough to feel the mechanism.</p>
+
+  <h2 id="gpt-run"><span class="sec">§8.3</span> The run</h2>
+  <p>Configuration: 32 dimensions, 4 heads, 2 blocks, context 12 — <strong>27,355 parameters</strong>, trained ~6 minutes in pure PHP with the JIT on:</p>
+  <div class="demo">
+    <div class="demo-label">The real training run — bin/train-gpt.php</div>
+    <canvas id="gc-canvas" width="1240" height="480" style="width:100%;height:auto;border-radius:6px"></canvas>
+    <p class="demo-note" style="margin:10px 0 0">Validation loss on 3,203 held-out names. The bigram and MLP lines mark the graves of chapters 3 and 6.</p>
+  </div>
+  <div class="scale" style="margin:20px 0">
+    <div class="srow"><span>Know-nothing</span><span class="bar"><i style="width:100%"></i></span><span class="val">3.2958</span></div>
+    <div class="srow"><span>Bigram (ch 3)</span><span class="bar"><i style="width:74%"></i></span><span class="val">2.4546</span></div>
+    <div class="srow"><span>MLP (ch 6)</span><span class="bar"><i style="width:57%"></i></span><span class="val">2.1932</span></div>
+    <div class="srow us"><span>GPT (ch 8)</span><span class="bar"><i style="width:52%"></i></span><span class="val">2.1175</span></div>
+  </div>
+  <p>Names from the three generations, same seed — read down the columns and watch a species evolve:</p>
+  <div class="files" style="line-height:2">
+<strong>bigram</strong>: quravah · sennn · nnanienann · zatowarim<br>
+<strong>MLP</strong>: jemmisha · kawana · shrimla · oaf · smarnayiah<br>
+<strong>GPT</strong>: kyrala · ahmera · brayana · gostiana · mirlee · leyden · soriah · alexia · jase
+  </div>
+
+  <h2 id="scale-club"><span class="sec">§8.4</span> You are now architecturally complete</h2>
+  <p>Compare, line by line — the differences are numbers, not ideas:</p>
+  <div class="files" style="overflow-x:auto">
+<span class="dim">              ours        GPT-2 (2019)   GPT-3 (2020)</span><br>
+blocks        2           12             96<br>
+heads/block   4           12             96<br>
+dimensions    32          768            12,288<br>
+context       12          1,024          2,048<br>
+vocabulary    27          50,257         50,257<br>
+parameters    27,355      124M           175B
+  </div>
+  <p>Every row scales the same blueprint you now have running: the same residual stream, the same attention formula, the same fused softmax + cross-entropy, the same <code>data -= learningRate × gradient</code>. What GPT-3 has that yours doesn't is six orders of magnitude more of everything — which chapter 11 will argue is both "only that" and "everything".</p>
+
+  <h2 id="ch8-build"><span class="sec">§8.5</span> The build</h2>
+  <div class="files">
+llm/<br>
+├── src/TransformerBlock.php&nbsp;&nbsp;<span class="you">← communication + computation, residual-wrapped</span><br>
+├── src/GptLanguageModel.php&nbsp;&nbsp;<span class="you">← the assembly + save/load persistence</span><br>
+├── src/Tensor.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="you">← + concatenateColumns, layerNormalizeRows</span><br>
+├── bin/train-gpt.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">the summit run; saves models/gpt-names.json</span><br>
+└── tests/check-ch8.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dim">8 checks: layer norm calculus, causality through the stack, persistence</span>
+  </div>
+  <pre><code>php tests/check-ch8.php
+./bin/phpj bin/train-gpt.php</code></pre>
+  <p>Read <code>TransformerBlock::forward()</code> — ten lines that are the backbone of every frontier model — and notice in <code>GptLanguageModel::computeLogits()</code> that the whole GPT is: embed, loop blocks, normalize, project. The trained weights now live in <code>models/gpt-names.json</code>; chapters 9 and 10 build on those exact numbers.</p>
+
+  <h2 id="ch8-quiz"><span class="sec">§8.6</span> Checkpoint quiz</h2>
+
+  <div class="quiz" data-why="Right — addition passes gradients through untouched, so the training signal reaches early layers undiminished no matter how deep the stack. The stream framing (blocks make additive edits to a shared flow) is also how interpretability researchers actually reason about transformers.">
+    <div class="q">1. Why do residual connections make DEEP networks trainable?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">They reduce the number of parameters to train</button>
+      <button class="qopt" type="button" data-right>Addition passes gradients through unchanged, so the loss signal reaches the earliest layers intact</button>
+      <button class="qopt" type="button">They let the network skip layers it doesn't need at inference</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Exactly — attention is the only place information crosses between positions (communication); the feed-forward net processes each position privately (computation). The block alternates them: gather, digest, gather, digest.">
+    <div class="q">2. What's the division of labor between attention and the feed-forward layer?</div>
+    <div class="qopts">
+      <button class="qopt" type="button">Attention handles grammar, feed-forward handles vocabulary</button>
+      <button class="qopt" type="button">Feed-forward is a faster approximation of attention</button>
+      <button class="qopt" type="button" data-right>Attention moves information BETWEEN positions; feed-forward processes each position privately</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
+  <div class="quiz" data-why="Yes — block 2 attends over representations that block 1's attention already enriched, so it can express lookups about lookups ('attend to the character after the first vowel'). Depth composes attention into hierarchies; that compounding is what the 96-block frontier stacks are buying.">
+    <div class="q">3. What does stacking a second block buy that a bigger single block can't?</div>
+    <div class="qopts">
+      <button class="qopt" type="button" data-right>Attention over attention — block 2 matches against patterns block 1 built, enabling composed, hierarchical lookups</button>
+      <button class="qopt" type="button">Twice the parameters, which is the entire benefit</button>
+      <button class="qopt" type="button">It only reduces overfitting</button>
+    </div>
+    <div class="qwhy"></div>
+  </div>
+
   <div class="next"><span class="tag">When you're ready</span>
-  <p style="margin:8px 0 0">Explore the four heatmaps, read <code>forward()</code>, then say <strong>"chapter 7 done"</strong>. Next: <em>the Transformer</em> — residual streams, layer norm, feed-forward layers, stacked blocks. We assemble the GPT and take the ladder's last rung.</p></div>
+  <p style="margin:8px 0 0">Click through the architecture, compare the three generations of names, read <code>TransformerBlock::forward()</code>, then say <strong>"chapter 8 done"</strong>. Next: <em>Inference</em> — temperature, top-k, and the KV cache: the knobs that turn one frozen model into many personalities.</p></div>
 </section>
 </main>
 </div>
@@ -1502,6 +1602,63 @@ llm/<br>
     }
   });
   renderAttention(0);
+
+  // ---------- ch8: architecture explorer + training curve ----------
+  var GPT = {"curve":[{"step":1,"batch":3.4531,"validation":2.9632},{"step":500,"batch":2.3296,"validation":2.2872},{"step":1000,"batch":2.2801,"validation":2.236},{"step":1500,"batch":2.0869,"validation":2.2071},{"step":2000,"batch":2.2213,"validation":2.1804},{"step":2500,"batch":2.2792,"validation":2.1692},{"step":3000,"batch":2.1169,"validation":2.1558},{"step":3500,"batch":2.2779,"validation":2.1496},{"step":4000,"batch":2.2407,"validation":2.1593},{"step":4500,"batch":2.0053,"validation":2.1091},{"step":5000,"batch":2.2203,"validation":2.0991}],"finalValidationLoss":2.1175,"parameterCount":27355,"samples":["","avina","cdaven","hirsha","kyrala","dejion","yupon","malies","ahmera","anaania","havison","car","aliphii","brayana","sonlley","gostiana","mirlee","leyden","keyd","samaah","m","soriah","mecy","jase","alexia"]}; // injected from docs/gpt-training.json
+  var GPT_STAGES = [
+    ["Embed + position", "Token IDs fetch their learned vectors; position vectors are added so order exists. The residual stream is born: one vector per position.", "27×32 table + 12×32 table", "Chapters 5-7"],
+    ["Block 1: norm → 4-head attention → add", "Positions communicate. Four heads each run the full query·key·value dance over an 8-dim slice; outputs concatenate, a projection mixes them, and the result is ADDED onto the stream.", "stream = stream + attention(norm(stream))", "Chapter 7 + new"],
+    ["Block 1: norm → feed-forward → add", "Positions compute, privately. Each vector expands 32→128, squashes through tanh, contracts back, and the edit is added onto the stream.", "stream = stream + think(norm(stream))", "New"],
+    ["Block 2: same again", "Attention over attention: this block's lookups act on representations block 1 already enriched — patterns of patterns. GPT-2 stacks 12 of these; GPT-3, 96.", "two more residual edits", "New"],
+    ["Final norm → project", "One last stabilization, then each position's 32 numbers are projected to 27 logits — softmax-ready scores for every character.", "32 → 27 per position", "Chapter 5"],
+    ["Loss / sample", "Training: fused softmax + cross-entropy against the actual next characters, all positions at once. Generation: sample from the last position, append, repeat.", "the loop that never changed", "Chapters 3, 5"]
+  ];
+  var gptArch = document.getElementById('gpt-arch'), gptDetail = document.getElementById('gpt-arch-detail');
+  GPT_STAGES.forEach(function (stage, i) {
+    var b = document.createElement('button');
+    b.className = 'pl-stage'; b.type = 'button'; b.textContent = stage[0];
+    b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+    b.addEventListener('click', function () { selectGptStage(i); });
+    gptArch.appendChild(b);
+    if (i < GPT_STAGES.length - 1) {
+      var a = document.createElement('span'); a.className = 'pl-arrow'; a.textContent = '→'; gptArch.appendChild(a);
+    }
+  });
+  function selectGptStage(i) {
+    gptArch.querySelectorAll('.pl-stage').forEach(function (el, j) {
+      el.setAttribute('aria-pressed', j === i ? 'true' : 'false');
+    });
+    var stage = GPT_STAGES[i];
+    gptDetail.innerHTML = '<span class="ch">' + stage[3] + '</span><p>' + stage[1] + '</p><div class="ex">' + stage[2] + '</div>';
+  }
+  selectGptStage(0);
+
+  (function drawGptCurve() {
+    var canvas = document.getElementById('gc-canvas'), context = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height, pad = 56;
+    var maxStep = Math.max.apply(null, GPT.curve.map(function (p) { return p.step; }));
+    var yMin = 1.9, yMax = 3.4;
+    var toX = function (s) { return pad + s / maxStep * (w - 2 * pad); };
+    var toY = function (l) { return h - pad - (Math.min(l, yMax) - yMin) / (yMax - yMin) * (h - 2 * pad); };
+    context.fillStyle = cssVar('--card'); context.fillRect(0, 0, w, h);
+    context.font = '20px ui-monospace, monospace';
+    [[2.4546, 'bigram 2.4546'], [2.1932, 'MLP 2.1932']].forEach(function (mark) {
+      context.strokeStyle = cssVar('--line'); context.setLineDash([6, 6]);
+      context.beginPath(); context.moveTo(pad, toY(mark[0])); context.lineTo(w - pad, toY(mark[0])); context.stroke();
+      context.setLineDash([]);
+      context.fillStyle = cssVar('--muted'); context.fillText(mark[1], w - pad - 190, toY(mark[0]) - 8);
+    });
+    context.strokeStyle = cssVar('--accent'); context.lineWidth = 4; context.beginPath();
+    GPT.curve.forEach(function (p, i) {
+      i === 0 ? context.moveTo(toX(p.step), toY(p.validation)) : context.lineTo(toX(p.step), toY(p.validation));
+    });
+    context.stroke();
+    var last = GPT.curve[GPT.curve.length - 1];
+    context.fillStyle = cssVar('--amber');
+    context.beginPath(); context.arc(toX(last.step), toY(last.validation), 9, 0, 7); context.fill();
+    context.font = '700 22px ui-monospace, monospace';
+    context.fillText('GPT ' + GPT.finalValidationLoss.toFixed(4), toX(last.step) - 230, toY(last.validation) + 34);
+  })();
 
   // ---------- quiz ----------
   document.querySelectorAll('.quiz').forEach(function (q) {

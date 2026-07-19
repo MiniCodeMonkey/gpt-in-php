@@ -29,7 +29,7 @@ PHP ≥ 8.3 with OPcache (using 8.5.8 via Laravel Herd).
 - [x] Ch 5 — Tensors (matrix autograd; neural bigram rediscovers 2.4588)
 - [x] Ch 6 — MLP language model (embeddings + context window; val loss 2.1932)
 - [x] Ch 7 — Self-attention (SelfAttentionHead; single head val loss 2.3267)
-- [ ] Ch 8 — The Transformer
+- [x] Ch 8 — The Transformer (GptLanguageModel, 27,355 params; val loss 2.1175)
 - [ ] Ch 9 — Inference
 - [ ] Ch 10 — The chatbot
 - [ ] Ch 11 — To the frontier
