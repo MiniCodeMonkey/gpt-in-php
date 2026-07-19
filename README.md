@@ -30,6 +30,6 @@ PHP ≥ 8.3 with OPcache (using 8.5.8 via Laravel Herd).
 - [x] Ch 6 — MLP language model (embeddings + context window; val loss 2.1932)
 - [x] Ch 7 — Self-attention (SelfAttentionHead; single head val loss 2.3267)
 - [x] Ch 8 — The Transformer (GptLanguageModel, 27,355 params; val loss 2.1175)
-- [ ] Ch 9 — Inference
-- [ ] Ch 10 — The chatbot
-- [ ] Ch 11 — To the frontier
+- [x] Ch 9 — Inference (TokenSampler: temperature + top-k)
+- [x] Ch 10 — The chatbot (two-stage training, 20/20 exam; php bin/chat.php)
+- [x] Ch 11 — To the frontier (theory + bin/frontier-math.php)

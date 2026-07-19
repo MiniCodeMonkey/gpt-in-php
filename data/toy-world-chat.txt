@@ -1,0 +1,800 @@
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> what does mia work as <bot> mia works as a baker <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> where does sam live <bot> sam lives in the green house <end>
+<user> who likes soup <bot> sam likes soup <end>
+<user> who is rex <bot> rex is the dog of leo <end>
+<user> what does ana work as <bot> ana works as a farmer <end>
+<user> who works as a doctor <bot> sam works as a doctor <end>
+<user> where does mia live <bot> mia lives in the red house <end>
+<user> what does sam work as <bot> sam works as a doctor <end>
+<user> who lives in the yellow house <bot> ana lives in the yellow house <end>
+<user> what pet does leo have <bot> leo has a dog named rex <end>
+<user> who is milo <bot> milo is the cat of mia <end>
+<user> what does max like to eat <bot> max likes tea <end>
+<user> who lives in the green house <bot> sam lives in the green house <end>
+<user> who works as a teacher <bot> leo works as a teacher <end>
+<user> what does sam like to eat <bot> sam likes soup <end>
+<user> who works as a farmer <bot> ana works as a farmer <end>
+<user> where does max live <bot> max lives in the white house <end>
+<user> who works as a baker <bot> mia works as a baker <end>
+<user> what pet does mia have <bot> mia has a cat named milo <end>
+<user> where does leo live <bot> leo lives in the blue house <end>
+<user> what pet does ana have <bot> ana has a fish named bubbles <end>
+<user> who is star <bot> star is the pony of max <end>
+<user> who lives in the white house <bot> max lives in the white house <end>
+<user> who works as a painter <bot> max works as a painter <end>
+<user> what pet does sam have <bot> sam has a bird named kiwi <end>
+<user> who lives in the red house <bot> mia lives in the red house <end>
+<user> what pet does max have <bot> max has a pony named star <end>
+<user> where does ana live <bot> ana lives in the yellow house <end>
+<user> what does max work as <bot> max works as a painter <end>
+<user> who likes cake <bot> ana likes cake <end>
+<user> who likes tea <bot> max likes tea <end>
+<user> what does leo like to eat <bot> leo likes apples <end>
+<user> who likes pizza <bot> mia likes pizza <end>
+<user> what does ana like to eat <bot> ana likes cake <end>
+<user> who likes apples <bot> leo likes apples <end>
+<user> who is bubbles <bot> bubbles is the fish of ana <end>
+<user> what does leo work as <bot> leo works as a teacher <end>
+<user> what does mia like to eat <bot> mia likes pizza <end>
+<user> who is kiwi <bot> kiwi is the bird of sam <end>
+<user> who lives in the blue house <bot> leo lives in the blue house <end>
+<user> what does mia work as <bot> mia works as a baker <end>

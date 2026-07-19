@@ -76,10 +76,16 @@ final class GptLanguageModel
         return $this->computeLogits($inputIds)->softmaxCrossEntropy($targetIds);
     }
 
+    /** @return array<int, float> raw scores for the token that follows the sequence — inference's raw material */
+    public function nextTokenLogits(array $tokenIds): array
+    {
+        return $this->computeLogits($tokenIds)->data[count($tokenIds) - 1];
+    }
+
     /** @return array<int, float> probability of each token following the given sequence */
     public function nextTokenProbabilities(array $tokenIds): array
     {
-        $logits = $this->computeLogits($tokenIds)->data[count($tokenIds) - 1];
+        $logits = $this->nextTokenLogits($tokenIds);
         $highest = max($logits);
         $exponentials = array_map(fn (float $logit) => exp($logit - $highest), $logits);
         $sum = array_sum($exponentials);
