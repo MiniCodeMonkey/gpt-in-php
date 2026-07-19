@@ -21,7 +21,7 @@ foreach ($tokenizer->vocabulary() as $tokenId => $character) {
     printf("  %2d → %s\n", $tokenId, $character === "\n" ? '\n  (newline — our "end of name" marker)' : $character);
 }
 
-$example = 'mathias';
+$example = 'emma';
 $tokenIds = $tokenizer->encode($example);
 printf("\nencode(\"%s\") → [%s]\n", $example, implode(', ', $tokenIds));
 printf("decode(back)     → \"%s\"  (round trip %s)\n\n", $tokenizer->decode($tokenIds),
@@ -39,7 +39,7 @@ foreach (array_slice($bytePairEncoder->merges(), 0, 15) as $index => [$first, $s
 }
 
 echo "\nNames tokenized with the learned merges:\n";
-foreach (['isabella', 'sophia', 'mathias', 'christopher'] as $name) {
+foreach (['isabella', 'sophia', 'penelope', 'christopher'] as $name) {
     printf("  %-12s → [%s]\n", $name, implode('][', $bytePairEncoder->tokenizeWord($name)));
 }
 

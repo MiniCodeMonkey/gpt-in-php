@@ -88,7 +88,7 @@ for ($i = 0; $i < 15; $i++) {
 
 // ---- Export real attention patterns for the textbook -----------------------
 $heatmaps = [];
-foreach (['mathias', 'isabella', 'alexander', 'sofia'] as $name) {
+foreach (['penelope', 'isabella', 'alexander', 'sofia'] as $name) {
     [$inputIds] = $buildSequence($name);
     $model->computeLogits($inputIds);
     $labels = array_map(
